@@ -17,7 +17,7 @@ function Splash() {
     <View style={styles.view}>
       <Text style={styles.text}>
         Splash Screen
-  </Text>
+      </Text>
     </View>
   );
 }
