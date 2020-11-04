@@ -5,7 +5,7 @@ import { RNCamera } from 'react-native-camera';
 
 import FlexStyles from '../../style/FlexStyleSheet'
 
-const CameraMain = () => {
+const CameraMain = ({navigation, route}) => {
     const [cameraSize, setCameraSize] = useState(1);
     const cameraRef = React.useRef(null);
 
@@ -17,6 +17,8 @@ const CameraMain = () => {
             exif: true,
         });
         console.log('capture', data);
+        console.log('data.uri ', data.uri );
+        navigation.navigate('Edit', { imagePath: data.uri });
       }
     };
 
@@ -35,7 +37,7 @@ const CameraMain = () => {
 
     return (
         <SafeAreaView style={[FlexStyles.flex_1]} >
-            <View style={[styles.camera_container]}>
+            <View style={[FlexStyles.flex_4, styles.camera_container]}>
                 <View style={[FlexStyles.flex_1, cameraStyle]}>
                   <RNCamera
                   ref={cameraRef}
@@ -43,7 +45,7 @@ const CameraMain = () => {
                   captureAudio={false} />
                 </View>
             </View>
-            <View style={[styles.camera_bottom]}>
+            <View style={[FlexStyles.flex_2,styles.camera_bottom]}>
               <Button onPress={takePhoto} title='A'/>
               <Button onPress={changeCameraSize} title='B'/>
             </View>
@@ -53,22 +55,18 @@ const CameraMain = () => {
 
 const styles = StyleSheet.create({ 
   camera_container: {
-    flex: 5,
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center',
     backgroundColor: 'white'
   },
   camera_bottom: {
-    flex: 1,
     backgroundColor: 'white'
   },
   camera_ratio_square: {
-    flex:1,
     aspectRatio: 1
   },
   camera_ratio_rectangle: {
-    flex:1,
     aspectRatio: 3/4
   },
 });

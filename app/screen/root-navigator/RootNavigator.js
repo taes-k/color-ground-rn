@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Splash from '../splash/Splash';
 import CameraMain from '../1_camera/CameraMain';
+import AppMainStack from './AppMainStack';
 
 const RootStack = createStackNavigator();
 
@@ -19,9 +20,8 @@ function RootNavigator() {
                 screenOptions={{ animationEnabled: false }}
                 // mode="modal"
             >
-
                 {isReady
-                    ? <RootStack.Screen name="CameraMain" component={CameraMain} />
+                    ? <RootStack.Screen name="AppMainStack" component={AppMainStack} />
                     : <RootStack.Screen name="Splash" component={Splash} />
                 }
             </RootStack.Navigator>
