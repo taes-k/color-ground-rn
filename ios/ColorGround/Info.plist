@@ -54,6 +54,8 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera를 사용합니다</string>
+	<string>카메라를 사용합니다</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>사진 라이브러리를 사용합니다</string>
 </dict>
 </plist>
