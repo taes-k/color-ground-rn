@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef } from 'react';
-import { StyleSheet, Text, View, Button, Image, ImageBackground, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, ImageBackground, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CameraRoll from "@react-native-community/cameraroll";
 import ViewShot from 'react-native-view-shot';
@@ -16,6 +16,10 @@ const EditMain = ({navigation, route}) => {
   const [colorchipRotate, setColorchipRotate] = useState(0);
   const [locationDisplay, setLocationDisplay] = useState(false);
   const [timeDisplay, setTimeDisplay] = useState(false);
+
+  const [pickColor, setPickColor] = useState('#FFFFFF');
+  const [pickLocateX, setPickLocateX] = useState(0);
+  const [pickLocateY, setPickLocateY] = useState(0);
 
   const { imagePath } = route.params;
 
@@ -35,6 +39,31 @@ const EditMain = ({navigation, route}) => {
     Alert.alert("사진이 갤러리에 저장되었습니다.");
   }
 
+  const onTouchEvent = (name, ev) => {
+    console.log(
+        `[${name}] ` + 
+        `root_x: ${ev.nativeEvent.pageX}, root_y: ${ev.nativeEvent.pageY} ` +
+        `target_x: ${ev.nativeEvent.locationX}, target_y: ${ev.nativeEvent.locationY} ` + 
+        `target: ${ev.nativeEvent.target}`
+    );
+    movePickChip(ev.nativeEvent.pageX,ev.nativeEvent.pageY);
+  }
+var pickChipStyle = { 
+  position: 'absolute',
+  backgroundColor: pickColor, 
+  left: pickLocateX, 
+  top: pickLocateY,
+  width: 44,
+  height: 44,
+  borderRadius: 44/2,};
+ 
+const movePickChip = (x, y) => {
+  console.log("FFFF",x,"||",y);
+  setPickColor('#00FF00');
+  setPickLocateX(x);
+  setPickLocateY(y);
+}
+
     return (
         <SafeAreaView style={[FlexStyles.flex_1]} >
           <View style={[FlexStyles.flex_4]}>
@@ -43,13 +72,21 @@ const EditMain = ({navigation, route}) => {
             </View>
 
             <ViewShot ref={snapshotTarget} style={[styles.image_container]}>
-              <ImageBackground style={[styles.image_view]} source={{uri: imagePath }} >
-                <View style={[styles.color_chip_box]}>
-                  <View style={[styles.color_chip]}></View>
-                  <View style={[styles.color_chip]}></View>
-                  <View style={[styles.color_chip]}></View>
-                </View>
-              </ImageBackground>
+              {/* <TouchableOpacity onPress={(e) => {console.log('touchMove',e.nativeEvent)}}> */}
+                <ImageBackground 
+                  style={[styles.image_view]} 
+                  source={{uri: imagePath }} 
+                  onStartShouldSetResponder={(ev) => true}
+                  onResponderGrant={onTouchEvent.bind(this, "onResponderGrant")}
+                  onResponderMove={onTouchEvent.bind(this, "onResponderMove")}>
+                  <View style={pickChipStyle}></View>
+                  <View style={[styles.color_chip_box]}>
+                    <View style={[styles.color_chip]}></View>
+                    <View style={[styles.color_chip]}></View>
+                    <View style={[styles.color_chip]}></View>
+                  </View>
+                </ImageBackground>
+              {/* </TouchableOpacity> */}
             </ViewShot>
           </View>
 
@@ -74,7 +111,13 @@ const styles = StyleSheet.create({
   },
   image_view: {
     flex: 1,
-    aspectRatio: 1
+    aspectRatio: 1,
+    position: 'relative'
+  },
+  color_chip_box:{
+    position:'absolute',
+    alignSelf: 'center',
+
   },
   color_chip: {
     width: 44,
