@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Button, Image, ImageBackground, Alert, Touchabl
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CameraRoll from "@react-native-community/cameraroll";
 import ViewShot from 'react-native-view-shot';
+import GetPixelColor from 'react-native-get-pixel-color';
 
 import FlexStyles from '../../style/FlexStyleSheet'
 
@@ -22,6 +23,8 @@ const EditMain = ({navigation, route}) => {
   const [pickLocateY, setPickLocateY] = useState(0);
 
   const { imagePath } = route.params;
+  
+  GetPixelColor.setImage(imagePath);
 
   const snapshotTarget = useRef();
   const onCapture = useCallback(() => {
@@ -46,23 +49,38 @@ const EditMain = ({navigation, route}) => {
         `target_x: ${ev.nativeEvent.locationX}, target_y: ${ev.nativeEvent.locationY} ` + 
         `target: ${ev.nativeEvent.target}`
     );
-    movePickChip(ev.nativeEvent.pageX,ev.nativeEvent.pageY);
+
+    coordX = ev.nativeEvent.pageX;
+    coordY = ev.nativeEvent.pageY;
+    
+    var color;
+    GetPixelColor
+      .pickColorAt(coordX, coordY)
+      .then(res => {
+        color = res;
+        console.log('COLOR',color)
+        movePickChip(coordX, coordY, color);
+      });
+
+
   }
-var pickChipStyle = { 
-  position: 'absolute',
-  backgroundColor: pickColor, 
-  left: pickLocateX, 
-  top: pickLocateY,
-  width: 44,
-  height: 44,
-  borderRadius: 44/2,};
- 
-const movePickChip = (x, y) => {
-  console.log("FFFF",x,"||",y);
-  setPickColor('#00FF00');
-  setPickLocateX(x);
-  setPickLocateY(y);
-}
+
+  var pickChipStyle = { 
+    position: 'absolute',
+    backgroundColor: pickColor, 
+    left: pickLocateX, 
+    top: pickLocateY,
+    width: 44,
+    height: 44,
+    borderRadius: 44/2,};
+  
+  const movePickChip = (x, y, color) => {
+    console.log("FFFF",x,"||",y);
+    setPickColor('#00FF00');
+    setPickColor(color);
+    setPickLocateX(x);
+    setPickLocateY(y);
+  }
 
     return (
         <SafeAreaView style={[FlexStyles.flex_1]} >
