@@ -1,16 +1,22 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, Image, ImageBackground, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CameraRoll from "@react-native-community/cameraroll";
 import ViewShot from 'react-native-view-shot';
 import GetPixelColor from 'react-native-get-pixel-color';
 
-import FlexStyles from '../../style/FlexStyleSheet'
+import FlexStyles from '../../style/FlexStyleSheet';
+import ExtractImageColor from './ExtractImageColor';
+import InitialColor from './function/InitialColor';
 
-// EditMain.defaultProps = {
-//   imagePath : "",
-// }
-const EditMain = ({navigation, route}) => {
+const EditMain = ({ navigation, route }) =>
+{
+
+  const [initialReady, setInitialReady] = useState(false);
+  const [initial3Colors, setInitial3Colors] = useState([]);
+  const [colorChip1, setColorChip1] = useState([]);
+  const [colorChip2, setColorChip2] = useState({});
+  const [colorChip3, setColorChip3] = useState({});
 
   const [preview, setPreview] = useState(null);
 
@@ -23,125 +29,188 @@ const EditMain = ({navigation, route}) => {
   const [pickLocateY, setPickLocateY] = useState(0);
 
   const { imagePath } = route.params;
-  
-  GetPixelColor.setImage(imagePath);
 
+  // ---------------------------------------------------------------------------------------------
+  // initial colorchip setting
+  // ---------------------------------------------------------------------------------------------
+
+  useEffect(() =>
+  {
+    console.log("INITAIL READY 2:", initialReady);
+    async function initColors()
+    {
+      await InitialColor.getInitial3Colors(imagePath, (x) => { setInitialReady(x) }, (x) => { setInitial3Colors(x) });
+      initialReady(true);
+    }
+
+    if (initialReady == false)
+    {
+      GetPixelColor.setImage(imagePath);
+      initColors();
+    }
+    else
+    {
+      setInitialColorChips();
+    }
+  }, [initialReady]);
+
+  var colorChip1Style = {};
+  var colorChip1Style = {};
+  var colorChip1Style = {};
+
+  var initialColorChip1Style = {
+    position: 'absolute',
+    backgroundColor: pickColor,
+    left: pickLocateX,
+    top: pickLocateY,
+    width: 44,
+    height: 44,
+    borderRadius: 44 / 2,
+  };
+
+  const setInitialColorChips = () =>
+  {
+    console.log("initailColor1", initial3Colors[0]);
+    console.log("initailColor2", initial3Colors[1]);
+    console.log("initailColor3", initial3Colors[2]);
+
+    setColorChip1(initial3Colors[0]);
+    setColorChip2(initial3Colors[1]);
+    setColorChip3(initial3Colors[2]);
+  }
+
+  var colorChip1Style = {
+    backgroundColor: colorChip1.hexColor,
+  }
+
+  var colorChip2Style = {
+    backgroundColor: colorChip2.hexColor,
+  }
+
+  var colorChip3Style = {
+    backgroundColor: colorChip3.hexColor,
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // div snapshot
+  // ---------------------------------------------------------------------------------------------
   const snapshotTarget = useRef();
-  const onCapture = useCallback(() => {
-    snapshotTarget.current.capture().then(uri => {
+  const onCapture = useCallback(() =>
+  {
+    snapshotTarget.current.capture().then(uri =>
+    {
       console.log(uri);
       saveImage(uri);
     });
   }, []);
 
-  const saveImage = async(imgUri) =>{
-    config = {type : 'photo', album : 'colorground'}
+  const saveImage = async (imgUri) =>
+  {
+    config = { type: 'photo', album: 'colorground' }
     // CameraRoll.save(imgUri, config);
     const result = await CameraRoll.save(imgUri);
-    console.log('🐤result', result);
     Alert.alert("사진이 갤러리에 저장되었습니다.");
   }
 
-  const onTouchEvent = (name, ev) => {
-    console.log(
-        `[${name}] ` + 
-        `root_x: ${ev.nativeEvent.pageX}, root_y: ${ev.nativeEvent.pageY} ` +
-        `target_x: ${ev.nativeEvent.locationX}, target_y: ${ev.nativeEvent.locationY} ` + 
-        `target: ${ev.nativeEvent.target}`
-    );
+  // ---------------------------------------------------------------------------------------------
+  // pick colorchip setting
+  // ---------------------------------------------------------------------------------------------
+  const onTouchEvent = (name, ev) =>
+  {
+    coordX = ev.nativeEvent.locationX;
+    coordY = ev.nativeEvent.locationY;
 
-    coordX = ev.nativeEvent.pageX;
-    coordY = ev.nativeEvent.pageY;
-    
     var color;
     GetPixelColor
       .pickColorAt(coordX, coordY)
-      .then(res => {
+      .then(res =>
+      {
         color = res;
-        console.log('COLOR',color)
         movePickChip(coordX, coordY, color);
       });
-
-
   }
 
-  var pickChipStyle = { 
+  var pickChipStyle = {
     position: 'absolute',
-    backgroundColor: pickColor, 
-    left: pickLocateX, 
-    top: pickLocateY,
-    width: 44,
-    height: 44,
-    borderRadius: 44/2,};
-  
-  const movePickChip = (x, y, color) => {
-    console.log("FFFF",x,"||",y);
+    backgroundColor: pickColor,
+    left: pickLocateX - 22,
+    top: pickLocateY - 22,
+  };
+
+  const movePickChip = (x, y, color) =>
+  {
     setPickColor('#00FF00');
     setPickColor(color);
     setPickLocateX(x);
     setPickLocateY(y);
   }
 
-    return (
-        <SafeAreaView style={[FlexStyles.flex_1]} >
-          <View style={[FlexStyles.flex_4]}>
-            <View style={[styles.option_tap]}>
+  // ---------------------------------------------------------------------------------------------
+  return (
+    <SafeAreaView style={[FlexStyles.flex_1]} >
+      <View style={[FlexStyles.flex_4]}>
+        <View style={[styles.option_tap]}>
 
+        </View>
+
+        <ViewShot ref={snapshotTarget} style={[styles.image_container]}>
+          {/* <TouchableOpacity onPress={(e) => {console.log('touchMove',e.nativeEvent)}}> */}
+          <ImageBackground
+            style={[styles.image_view]}
+            source={{ uri: imagePath }}
+            onStartShouldSetResponder={(ev) => true}
+            onResponderGrant={onTouchEvent.bind(this, "onResponderGrant")}
+            onResponderMove={onTouchEvent.bind(this, "onResponderMove")}>
+            <View style={[styles.color_chip, pickChipStyle]}></View>
+            <View style={[styles.color_chip_box]}>
+              <View style={[styles.color_chip, colorChip1Style]}></View>
+              <View style={[styles.color_chip, colorChip2Style]}></View>
+              <View style={[styles.color_chip, colorChip3Style]}></View>
             </View>
+          </ImageBackground>
+          {/* </TouchableOpacity> */}
+        </ViewShot>
+      </View>
 
-            <ViewShot ref={snapshotTarget} style={[styles.image_container]}>
-              {/* <TouchableOpacity onPress={(e) => {console.log('touchMove',e.nativeEvent)}}> */}
-                <ImageBackground 
-                  style={[styles.image_view]} 
-                  source={{uri: imagePath }} 
-                  onStartShouldSetResponder={(ev) => true}
-                  onResponderGrant={onTouchEvent.bind(this, "onResponderGrant")}
-                  onResponderMove={onTouchEvent.bind(this, "onResponderMove")}>
-                  <View style={pickChipStyle}></View>
-                  <View style={[styles.color_chip_box]}>
-                    <View style={[styles.color_chip]}></View>
-                    <View style={[styles.color_chip]}></View>
-                    <View style={[styles.color_chip]}></View>
-                  </View>
-                </ImageBackground>
-              {/* </TouchableOpacity> */}
-            </ViewShot>
-          </View>
-
-          <View style={[FlexStyles.flex_2]}>
-            <Button title="Go back" onPress={() => navigation.goBack()} />
-            <Button title="save" onPress={() => onCapture()} />
-          </View>
-        </SafeAreaView>
-    );
+      <View style={[FlexStyles.flex_2]}>
+        <Button title="Go back" onPress={() => navigation.goBack()} />
+        <Button title="save" onPress={() => onCapture()} />
+      </View>
+    </SafeAreaView>
+  );
 }
 
-const styles = StyleSheet.create({ 
+const styles = StyleSheet.create({
   option_tap: {
     backgroundColor: 'blue',
     height: 60
   },
   image_container: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    backgroundColor: 'white'
   },
   image_view: {
     flex: 1,
     aspectRatio: 1,
-    position: 'relative'
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  color_chip_box:{
-    position:'absolute',
+  color_chip_box: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'center',
-
+    borderRadius: 44 / 2,
   },
   color_chip: {
     width: 44,
     height: 44,
-    borderRadius: 44/2,
-    backgroundColor: 'red'
+    borderRadius: 44 / 2,
+    backgroundColor: 'red',
+    borderColor: '#FFFFFF',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    marginRight: 15,
   }
 });
 
