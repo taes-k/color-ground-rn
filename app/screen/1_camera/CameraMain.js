@@ -5,55 +5,75 @@ import { RNCamera } from 'react-native-camera';
 
 import FlexStyles from '../../style/FlexStyleSheet'
 
-const CameraMain = ({navigation, route}) => {
-    const [cameraSize, setCameraSize] = useState(1);
-    const cameraRef = React.useRef(null);
+const CameraMain = ({ navigation, route }) =>
+{
+  const [cameraSize, setCameraSize] = useState(1);
+  const cameraRef = React.useRef(null);
 
-    const takePhoto = async () => {
-      console.log('cameraRef', cameraRef);
-      if (cameraRef) {
-        const data = await cameraRef.current.takePictureAsync({
-            quality: 1,
-            exif: true,
-        });
-        console.log('capture', data);
-        console.log('data.uri ', data.uri );
-        navigation.navigate('Edit', { imagePath: data.uri });
-      }
-    };
-
-    const changeCameraSize = () => {
-      if(cameraSize == 1)
-        setCameraSize(3/4);
-      else
-        setCameraSize(1);
+  // ---------------------------------------------------------------------------------------------
+  // take photo
+  // ---------------------------------------------------------------------------------------------
+  const takePhoto = async () =>
+  {
+    console.log('cameraRef', cameraRef);
+    if (cameraRef)
+    {
+      const data = await cameraRef.current.takePictureAsync({
+        quality: 1,
+        exif: true,
+      });
+      console.log('capture', data);
+      console.log('data.uri ', data.uri);
+      navigation.navigate('Edit', { imagePath: data.uri });
     }
+  };
 
-    var cameraStyle;
-    if(cameraSize == 1)
-      cameraStyle = [styles.camera_ratio_square];
-    else if (cameraSize == 3/4)
-      cameraStyle = [styles.camera_ratio_rectangle];
 
-    return (
-        <SafeAreaView style={[FlexStyles.flex_1]} >
-            <View style={[FlexStyles.flex_4, styles.camera_container]}>
-                <View style={[FlexStyles.flex_1, cameraStyle]}>
-                  <RNCamera
-                  ref={cameraRef}
-                  style={[FlexStyles.flex_1]}
-                  captureAudio={false} />
-                </View>
-            </View>
-            <View style={[FlexStyles.flex_2,styles.camera_bottom]}>
-              <Button onPress={takePhoto} title='A'/>
-              <Button onPress={changeCameraSize} title='B'/>
-            </View>
-        </SafeAreaView>
-    );
+  // ---------------------------------------------------------------------------------------------
+  // change camera size
+  // ---------------------------------------------------------------------------------------------
+  const changeCameraSize = () =>
+  {
+    if (cameraSize == 1)
+      setCameraSize(3 / 4);
+    else
+      setCameraSize(1);
+  }
+
+  var cameraStyle;
+  if (cameraSize == 1)
+    cameraStyle = [styles.camera_ratio_square];
+  else if (cameraSize == 3 / 4)
+    cameraStyle = [styles.camera_ratio_rectangle];
+
+  // ---------------------------------------------------------------------------------------------
+  // go to album
+  // ---------------------------------------------------------------------------------------------
+  const goToAlbum = () =>
+  {
+    navigation.navigate('Album', {});
+  };
+
+  return (
+    <SafeAreaView style={[FlexStyles.flex_1]} >
+      <View style={[FlexStyles.flex_4, styles.camera_container]}>
+        <View style={[FlexStyles.flex_1, cameraStyle]}>
+          <RNCamera
+            ref={cameraRef}
+            style={[FlexStyles.flex_1]}
+            captureAudio={false} />
+        </View>
+      </View>
+      <View style={[FlexStyles.flex_2, styles.camera_bottom]}>
+        <Button onPress={takePhoto} title='TakePhoto' />
+        <Button onPress={changeCameraSize} title='B' />
+        <Button onPress={goToAlbum} title='Album' />
+      </View>
+    </SafeAreaView>
+  );
 }
 
-const styles = StyleSheet.create({ 
+const styles = StyleSheet.create({
   camera_container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -67,7 +87,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1
   },
   camera_ratio_rectangle: {
-    aspectRatio: 3/4
+    aspectRatio: 3 / 4
   },
 });
 

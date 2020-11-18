@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Camera from '../1_camera/CameraMain';
 import Edit from '../3_edit/EditMain';
+import Album from '../2_album/AlbumMain';
 
 const Stack = createStackNavigator();
 
@@ -22,6 +23,10 @@ function AppMainStack() {
             <Stack.Screen 
                 name="Edit" 
                 component={Edit}  />
+
+            <Stack.Screen 
+                name="Album" 
+                component={Album}  />
         </Stack.Navigator>
     );
 }
