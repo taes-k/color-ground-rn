@@ -4,9 +4,8 @@ import { Image } from 'react-native';
 
 import GetPixelColor from 'react-native-get-pixel-color';
 
-import ImageSize from './ImageSize'
-import PickColor from './PickColor'
-import * as InitialExtractColorsActions from '../../../store/actions/InitialExtractColors';
+import ImageSize from './ImageSize';
+import PickColor from './PickColor';
 
 const getInitial3Colors = async (imagePath, setInitialReady, setInitialColors) =>
 {

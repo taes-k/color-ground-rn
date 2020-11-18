@@ -4,12 +4,14 @@ const initialState = {
     isReady: false,
 }
 
-export default (state = initialState, action) => {
-    switch (action.type) {
+export default (state = initialState, action) =>
+{
+    switch (action.type)
+    {
         case actions.READY_COMPLETE:
             state.isReady = true;
-        default :
-            // do nothing
+        default:
+        // do nothing
     }
 
     return state;
