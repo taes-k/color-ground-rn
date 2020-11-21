@@ -16,7 +16,8 @@ const getInitial3Colors = async (imagePath, setInitialReady, setInitialColors) =
     setInitialReady(true);
 }
 
-const getInitailColors = async (imagePath) =>{
+const getInitailColors = async (imagePath) =>
+{
     var [width, height] = await getImageSize(imagePath);
     var colors = await getSampleColors(imagePath, width, height);
     var initialColors = getBig3SampleColors(colors)
@@ -24,13 +25,16 @@ const getInitailColors = async (imagePath) =>{
     return initialColors;
 }
 
-const getImageSize = async (imagePath) => new Promise(resolve => {
-    Image.getSize(imagePath, (width, height) => {
-      resolve([width, height]);
+const getImageSize = async (imagePath) => new Promise(resolve =>
+{
+    Image.getSize(imagePath, (width, height) =>
+    {
+        resolve([width, height]);
     });
-  })
+})
 
-const getSampleColors = async (imagePath, width, height) =>{
+const getSampleColors = async (imagePath, width, height) =>
+{
     var pickSize = 20;
     var colors = [];
     var pickCount = 0;
@@ -63,7 +67,8 @@ const getSampleColors = async (imagePath, width, height) =>{
     return colors;
 }
 
-const getBig3SampleColors = (colors) => {
+const getBig3SampleColors = (colors) =>
+{
     var tempPickColors = [];
 
     var colorsIdx = 0
@@ -76,9 +81,10 @@ const getBig3SampleColors = (colors) => {
     var currentPickSaturation: Float
     var currentPickBrightness: Float
 
-    var hueStandard = 50;
+    var hueStandard = 60;
     var saturationStandard = 50;
-    var brightnessStandard = 0.6;
+    var brightnessStandard = 0.7;
+    var maxLoopCountStandard = 7;
 
 
     colors.sort(function (a, b)
@@ -97,12 +103,14 @@ const getBig3SampleColors = (colors) => {
 
     while (tempPickColors.length < 3)
     {
-        if (loopCount > 5)
+        console.log('loopCount', loopCount, '/hueStandard', hueStandard, '/saturationStandard', saturationStandard, '/brightnessStandard', brightnessStandard)
+        if (loopCount > maxLoopCountStandard)
         {
             hueStandard = 0
             brightnessStandard = 0
             saturationStandard = 0
         }
+
         if (tempPickColors.length == 0)
         {
             var currentPickSaturation = colors[colorsIdx].saturation;
@@ -122,11 +130,13 @@ const getBig3SampleColors = (colors) => {
             var currentPickBrightness = colors[colorsIdx].brightness;
 
             if (Math.abs(pickedColorHue1 - currentPickHue) >= hueStandard
+                && currentPickSaturation >= saturationStandard
                 && currentPickBrightness >= brightnessStandard)
             {
                 tempPickColors.push(colors[colorsIdx]);
             }
-        } else
+        }
+        else
         {
             var pickedColorHue1 = tempPickColors[0].hue;
             var pickedColorHue2 = tempPickColors[1].hue;
@@ -135,9 +145,10 @@ const getBig3SampleColors = (colors) => {
             var currentPickSaturation = colors[colorsIdx].saturation;
             var currentPickBrightness = colors[colorsIdx].brightness;
 
-            if (Math.abs(pickedColorHue1 - currentPickHue) >= hueStandard &&
-                Math.abs(pickedColorHue2 - currentPickHue) >= hueStandard &&
-                currentPickBrightness >= brightnessStandard)
+            if (Math.abs(pickedColorHue1 - currentPickHue) >= hueStandard
+                && Math.abs(pickedColorHue2 - currentPickHue) >= hueStandard
+                && currentPickSaturation >= saturationStandard
+                && currentPickBrightness >= brightnessStandard)
             {
                 tempPickColors.push(colors[colorsIdx]);
             }
@@ -146,9 +157,9 @@ const getBig3SampleColors = (colors) => {
         colorsIdx++;
         if (colorsIdx >= colors.length)
         {
-            hueStandard = hueStandard / 1.5
-            saturationStandard = saturationStandard / 1.5
-            brightnessStandard = brightnessStandard / 1.5
+            hueStandard = hueStandard / 1.2
+            saturationStandard = saturationStandard / 1.2
+            brightnessStandard = brightnessStandard / 1.2
 
             colorsIdx = 0
             loopCount = loopCount + 1
@@ -165,6 +176,9 @@ const getHSBFromRGB = (red, green, blue) =>
         saturation: 0,
         brightness: 0,
     }
+    red = red / 256;
+    green = green / 256;
+    blue = blue / 256;
 
     let maxRgb = Math.max(red, green, blue);
     let minRgb = Math.min(red, green, blue);
