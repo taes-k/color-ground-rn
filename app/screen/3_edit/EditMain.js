@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, Button, Image, ImageBackground, Alert, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, ImageBackground, Alert, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CameraRoll from "@react-native-community/cameraroll";
 import ViewShot from 'react-native-view-shot';
@@ -11,10 +11,12 @@ import InitialColor from './function/InitialColor';
 
 const EditMain = ({ navigation, route }) =>
 {
+  const { imagePath } = route.params;
 
   const [initialReady, setInitialReady] = useState(false);
+
   const [initial3Colors, setInitial3Colors] = useState([]);
-  const [colorChip1, setColorChip1] = useState([]);
+  const [colorChip1, setColorChip1] = useState({});
   const [colorChip2, setColorChip2] = useState({});
   const [colorChip3, setColorChip3] = useState({});
 
@@ -24,11 +26,10 @@ const EditMain = ({ navigation, route }) =>
   const [locationDisplay, setLocationDisplay] = useState(false);
   const [timeDisplay, setTimeDisplay] = useState(false);
 
-  const [pickColor, setPickColor] = useState('#FFFFFF');
-  const [pickLocateX, setPickLocateX] = useState(0);
-  const [pickLocateY, setPickLocateY] = useState(0);
+  const [pickColorChip, setPickColorChip] = useState({ coordX: 0, coordY: 0, hexColor: '#FFFFFF', red: 256, green: 256, blue: 256, hue: 0, saturation: 1, brightness: 1 })
+  const [pickColorChipDisplay, setPickColorChipDisplay] = useState(false);
+  const [pickedColorChipNumber, setPickedColorChipNumber] = useState(0);
 
-  const { imagePath } = route.params;
 
   // ---------------------------------------------------------------------------------------------
   // initial colorchip setting
@@ -40,7 +41,7 @@ const EditMain = ({ navigation, route }) =>
     async function initColors()
     {
       await InitialColor.getInitial3Colors(imagePath, (x) => { setInitialReady(x) }, (x) => { setInitial3Colors(x) });
-      initialReady(true);
+      setInitialReady(true);
     }
 
     if (initialReady == false)
@@ -54,19 +55,10 @@ const EditMain = ({ navigation, route }) =>
     }
   }, [initialReady]);
 
-  var colorChip1Style = {};
-  var colorChip1Style = {};
-  var colorChip1Style = {};
 
-  var initialColorChip1Style = {
-    position: 'absolute',
-    backgroundColor: pickColor,
-    left: pickLocateX,
-    top: pickLocateY,
-    width: 44,
-    height: 44,
-    borderRadius: 44 / 2,
-  };
+  var colorChip1Style = {};
+  var colorChip1Style = {};
+  var colorChip1Style = {};
 
   const setInitialColorChips = () =>
   {
@@ -81,14 +73,23 @@ const EditMain = ({ navigation, route }) =>
 
   var colorChip1Style = {
     backgroundColor: colorChip1.hexColor,
+    borderColor: '#FFFFFF',
+    borderStyle: 'solid',
+    borderWidth: pickedColorChipNumber == 1 & pickColorChipDisplay ? 1 : 0,
   }
 
   var colorChip2Style = {
     backgroundColor: colorChip2.hexColor,
+    borderColor: '#FFFFFF',
+    borderStyle: 'solid',
+    borderWidth: pickedColorChipNumber == 2 & pickColorChipDisplay ? 1 : 0,
   }
 
   var colorChip3Style = {
     backgroundColor: colorChip3.hexColor,
+    borderColor: '#FFFFFF',
+    borderStyle: 'solid',
+    borderWidth: pickedColorChipNumber == 3 & pickColorChipDisplay ? 1 : 0,
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -97,6 +98,7 @@ const EditMain = ({ navigation, route }) =>
   const snapshotTarget = useRef();
   const onCapture = useCallback(() =>
   {
+    setPickColorChipDisplay(false);
     snapshotTarget.current.capture().then(uri =>
     {
       console.log(uri);
@@ -115,34 +117,116 @@ const EditMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   // pick colorchip setting
   // ---------------------------------------------------------------------------------------------
-  const onTouchEvent = (name, ev) =>
-  {
-    coordX = ev.nativeEvent.locationX;
-    coordY = ev.nativeEvent.locationY;
 
-    var color;
-    GetPixelColor
-      .pickColorAt(coordX, coordY)
-      .then(res =>
+  useEffect(() =>
+  {
+    switch(pickedColorChipNumber)
+    {
+      case 1:
+        setColorChip1(pickColorChip);
+        break;
+      case 2:
+        setColorChip2(pickColorChip);
+        break;
+      case 3:
+        setColorChip3(pickColorChip);
+        break;
+        
+    }
+  }, [pickColorChip])
+
+  const onColorchipTouchEvent = (number) =>
+  {
+
+    if (pickColorChipDisplay == false || pickedColorChipNumber != number)
+    {
+      setPickedColorChipNumber(number);
+      switch (number)
       {
-        color = res;
-        movePickChip(coordX, coordY, color);
-      });
+        case 1:
+          var coordX = colorChip1.coordX;
+          var coordY = colorChip1.coordY;
+          var hexColor = colorChip1.hexColor;
+          var red = colorChip1.red;
+          var green = colorChip1.green;
+          var blue = colorChip1.blue;
+          var hue = colorChip1.hue;
+          var saturation = colorChip1.saturation;
+          var brightness = colorChip1.brightness;
+
+          setPickColorChip({ coordX: coordX, coordY: coordY, hexColor: hexColor, red: red, green: green, blue: blue, hue: hue, saturation: saturation, brightness: brightness });
+          break;
+        case 2:
+          var coordX = colorChip2.coordX;
+          var coordY = colorChip2.coordY;
+          var hexColor = colorChip2.hexColor;
+          var red = colorChip2.red;
+          var green = colorChip2.green;
+          var blue = colorChip2.blue;
+          var hue = colorChip2.hue;
+          var saturation = colorChip2.saturation;
+          var brightness = colorChip2.brightness;
+
+          setPickColorChip({ coordX: coordX, coordY: coordY, hexColor: hexColor, red: red, green: green, blue: blue, hue: hue, saturation: saturation, brightness: brightness });
+          break;
+        case 3:
+          var coordX = colorChip3.coordX;
+          var coordY = colorChip3.coordY;
+          var hexColor = colorChip3.hexColor;
+          var red = colorChip3.red;
+          var green = colorChip3.green;
+          var blue = colorChip3.blue;
+          var hue = colorChip3.hue;
+          var saturation = colorChip3.saturation;
+          var brightness = colorChip3.brightness;
+
+          setPickColorChip({ coordX: coordX, coordY: coordY, hexColor: hexColor, red: red, green: green, blue: blue, hue: hue, saturation: saturation, brightness: brightness });
+          break;
+      }
+
+      setPickColorChipDisplay(true);
+    }
+    else
+    {
+      setPickColorChipDisplay(false);
+    }
+  }
+
+  const onPhotoTouchEvent = (name, ev) =>
+  {
+    if (pickColorChipDisplay == true)
+    {
+      coordX = ev.nativeEvent.locationX;
+      coordY = ev.nativeEvent.locationY;
+
+      var color;
+      GetPixelColor
+        .pickColorAt(coordX, coordY)
+        .then(res =>
+        {
+          color = res;
+          movePickColorChip(coordX, coordY, color);
+        });
+    }
   }
 
   var pickChipStyle = {
     position: 'absolute',
-    backgroundColor: pickColor,
-    left: pickLocateX - 22,
-    top: pickLocateY - 22,
+    backgroundColor: pickColorChip.hexColor,
+    left: pickColorChip.coordX - 22,
+    top: pickColorChip.coordY - 22,
+    display: pickColorChipDisplay == true ? 'flex' : 'none',
   };
 
-  const movePickChip = (x, y, color) =>
+  const movePickColorChip = (x, y, color) =>
   {
-    setPickColor('#00FF00');
-    setPickColor(color);
-    setPickLocateX(x);
-    setPickLocateY(y);
+    setPickColorChip({ coordX: x, coordY: y, hexColor: color, red: 0, green: 0, blue: 0, hue: 0, saturation: 0, brightness: 0 });
+  }
+
+  const correctionCoord = (x, y) => 
+  {
+    var scale = 1;
+
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -154,21 +238,28 @@ const EditMain = ({ navigation, route }) =>
         </View>
 
         <ViewShot ref={snapshotTarget} style={[styles.image_container]}>
-          {/* <TouchableOpacity onPress={(e) => {console.log('touchMove',e.nativeEvent)}}> */}
           <ImageBackground
             style={[styles.image_view]}
             source={{ uri: imagePath }}
             onStartShouldSetResponder={(ev) => true}
-            onResponderGrant={onTouchEvent.bind(this, "onResponderGrant")}
-            onResponderMove={onTouchEvent.bind(this, "onResponderMove")}>
+            onResponderGrant={onPhotoTouchEvent.bind(this, "onResponderGrant")}
+            onResponderMove={onPhotoTouchEvent.bind(this, "onResponderMove")}>
             <View style={[styles.color_chip, pickChipStyle]}></View>
             <View style={[styles.color_chip_box]}>
-              <View style={[styles.color_chip, colorChip1Style]}></View>
-              <View style={[styles.color_chip, colorChip2Style]}></View>
-              <View style={[styles.color_chip, colorChip3Style]}></View>
+              <TouchableOpacity
+                style={[styles.color_chip, colorChip1Style]}
+                onPress={() => onColorchipTouchEvent(1)}
+              />
+              <TouchableOpacity
+                style={[styles.color_chip, colorChip2Style]}
+                onPress={() => onColorchipTouchEvent(2)}
+              />
+              <TouchableOpacity
+                style={[styles.color_chip, colorChip3Style]}
+                onPress={() => onColorchipTouchEvent(3)}
+              />
             </View>
           </ImageBackground>
-          {/* </TouchableOpacity> */}
         </ViewShot>
       </View>
 
@@ -207,9 +298,6 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 44 / 2,
     backgroundColor: 'red',
-    borderColor: '#FFFFFF',
-    borderStyle: 'solid',
-    borderWidth: 1,
     marginRight: 15,
   }
 });
