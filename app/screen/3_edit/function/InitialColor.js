@@ -103,7 +103,6 @@ const getBig3SampleColors = (colors) =>
 
     while (tempPickColors.length < 3)
     {
-        console.log('loopCount', loopCount, '/hueStandard', hueStandard, '/saturationStandard', saturationStandard, '/brightnessStandard', brightnessStandard)
         if (loopCount > maxLoopCountStandard)
         {
             hueStandard = 0

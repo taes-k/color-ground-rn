@@ -5,6 +5,7 @@ import { RNCamera } from 'react-native-camera';
 
 import FlexStyles from '../../style/FlexStyleSheet'
 
+import ImagePreprocessor from '../3_edit/function/ImagePreprocessor'
 const CameraMain = ({ navigation, route }) =>
 {
   const [cameraSize, setCameraSize] = useState(1);
@@ -22,9 +23,9 @@ const CameraMain = ({ navigation, route }) =>
         quality: 1,
         exif: true,
       });
-      console.log('capture', data);
-      console.log('data.uri ', data.uri);
-      navigation.navigate('Edit', { imagePath: data.uri });
+
+      var resizeImageurl = await ImagePreprocessor.getResizeImage(data.uri);
+      navigation.navigate('Edit', { imagePath: resizeImageurl });
     }
   };
 

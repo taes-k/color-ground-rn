@@ -3,10 +3,11 @@ import { StyleSheet, Text, SafeAreaView, View, FlatList, ScrollView, Button, Ima
 import CameraRoll from '@react-native-community/cameraroll';
 
 import FlexStyles from '../../style/FlexStyleSheet';
+import ImagePreprocessor from '../3_edit/function/ImagePreprocessor'
 
 const AlbumMain = ({ navigation, route }) => 
 {
-    const albumFetchSize = 90;
+    const albumFetchSize = 60;
 
     const [photos, setPhotos] = useState([]);
     const [photoEndCursor, setPhotoEndCursor] = useState(null);
@@ -23,14 +24,11 @@ const AlbumMain = ({ navigation, route }) =>
     }, [isScrollBottom, isPhotoLoading]);
 
 
-  // ---------------------------------------------------------------------------------------------
-  // get photos from album
-  // ---------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    // get photos from album
+    // ---------------------------------------------------------------------------------------------
     getPhtosFromAlbum = async () =>
     {
-        console.log("isScrollBottom", isScrollBottom);
-        console.log("isPhotoLoading", isPhotoLoading);
-        console.log("photoHasNext", photoHasNext);
         if (!isPhotoLoading && photoHasNext)
         {
             setPhotoLoading(true);
@@ -63,7 +61,6 @@ const AlbumMain = ({ navigation, route }) =>
             }
             catch (error)
             {
-                console.log('getPhtosFromAlbum Error : ', error);
                 setPhotoLoading(false);
             }
         }
@@ -75,11 +72,15 @@ const AlbumMain = ({ navigation, route }) =>
         setScrollIsBottom(true);
     };
 
-  // ---------------------------------------------------------------------------------------------
-  // select photo to edit
-  // ---------------------------------------------------------------------------------------------
-    const getPhotoToEdit = (imagePath) =>{
-      navigation.navigate('Edit', { imagePath: imagePath });
+    // ---------------------------------------------------------------------------------------------
+    // select photo to edit
+    // ---------------------------------------------------------------------------------------------
+    const getPhotoToEdit = async (imagePath) =>
+    {
+        console.log("origin Path :", imagePath);
+        var resizeImageurl = await ImagePreprocessor.getResizeImage(imagePath);
+        console.log('resizeImageurl ', resizeImageurl);
+        navigation.navigate('Edit', { imagePath: resizeImageurl });
     }
 
     return (
@@ -99,7 +100,7 @@ const AlbumMain = ({ navigation, route }) =>
                 {
                     return <TouchableOpacity
                         style={[styles.photo_card_wrapper]}
-                        onPress={() => { getPhotoToEdit(data.item.node.image.uri )}}
+                        onPress={() => { getPhotoToEdit(data.item.node.image.uri) }}
                     >
                         <Image
                             key={data.index}
@@ -114,6 +115,8 @@ const AlbumMain = ({ navigation, route }) =>
     );
 
 }
+
+
 
 const styles = StyleSheet.create({
     album_headere: {
