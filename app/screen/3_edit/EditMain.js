@@ -8,10 +8,12 @@ import GetPixelColor from 'react-native-get-pixel-color';
 import FlexStyles from '../../style/FlexStyleSheet';
 import ExtractImageColor from './ExtractImageColor';
 import InitialColor from './function/InitialColor';
+import ImagePreprocessor from './function/ImagePreprocessor';
 
 const EditMain = ({ navigation, route }) =>
 {
   const { imagePath } = route.params;
+  const [imageScale, setImageScale] = useState(1);
 
   const [initialReady, setInitialReady] = useState(false);
 
@@ -41,9 +43,14 @@ const EditMain = ({ navigation, route }) =>
     async function initColors()
     {
       await InitialColor.getInitial3Colors(imagePath, (x) => { setInitialReady(x) }, (x) => { setInitial3Colors(x) });
+      var [width, height] = await ImagePreprocessor.getImageSize(imagePath);
+
+      var scale = width/Dimensions.get('window').width;
+
+      console.log("scale",scale);
+      setImageScale(scale);
       setInitialReady(true);
     }
-
     if (initialReady == false)
     {
       GetPixelColor.setImage(imagePath);
@@ -201,7 +208,7 @@ const EditMain = ({ navigation, route }) =>
 
       var color;
       GetPixelColor
-        .pickColorAt(coordX, coordY)
+        .pickColorAt(Math.round(coordX*imageScale), Math.round(coordY*imageScale))
         .then(res =>
         {
           color = res;
@@ -216,6 +223,9 @@ const EditMain = ({ navigation, route }) =>
     left: pickColorChip.coordX - 22,
     top: pickColorChip.coordY - 22,
     display: pickColorChipDisplay == true ? 'flex' : 'none',
+    borderColor: '#FFFFFF',
+    borderStyle: 'solid',
+    borderWidth: 1,
   };
 
   const movePickColorChip = (x, y, color) =>

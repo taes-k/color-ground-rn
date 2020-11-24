@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Camera from '../1_camera/CameraMain';
 import Edit from '../3_edit/EditMain';
-import Album from '../2_album/AlbumMain';
+import Album from '../2_album/NewAblumMain';
 
 const Stack = createStackNavigator();
 

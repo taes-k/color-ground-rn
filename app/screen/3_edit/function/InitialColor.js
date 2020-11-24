@@ -1,6 +1,6 @@
 import React, { useState, useSelector, useEffect } from 'react';
 import { useCallback } from 'react-redux';
-import { Image } from 'react-native';
+import { Image, Dimensions } from 'react-native';
 
 import GetPixelColor from 'react-native-get-pixel-color';
 
@@ -40,6 +40,7 @@ const getSampleColors = async (imagePath, width, height) =>
     var pickCount = 0;
     var widthTerm = Math.floor(width / pickSize);
     var heightTerm = Math.floor(height / pickSize);
+    var scale = width/Dimensions.get('window').width;
 
     for (x = 1; x <= pickSize; x++)
     {
@@ -58,7 +59,7 @@ const getSampleColors = async (imagePath, width, height) =>
 
                     var hsb = getHSBFromRGB(red, green, blue);
 
-                    var colorObj = { coordX: coordX, coordY: coordY, hexColor: color, red: red, green: green, blue: blue, hue: hsb.hue, saturation: hsb.saturation, brightness: hsb.brightness };
+                    var colorObj = { coordX: Math.round(coordX/scale), coordY: Math.round(coordY/scale), hexColor: color, red: red, green: green, blue: blue, hue: hsb.hue, saturation: hsb.saturation, brightness: hsb.brightness };
 
                     colors.push(colorObj);
                 });
