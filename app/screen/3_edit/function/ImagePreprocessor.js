@@ -3,47 +3,40 @@ import { Dimensions } from 'react-native';
 import ImageEditor from "@react-native-community/image-editor";
 import { Image } from 'react-native';
 
-const SIZE_SCALE = 5;
-
 const getResizeImage = async (imagePath) =>
 {
-    var [width, height] = await getImageSize(imagePath);
-    var cropImageUrl = await cropImage(imagePath, { width: width, height: height });
-
-    return cropImageUrl;
+    return await cropImage(imagePath);
 }
 
-const cropImage = async (imagePath, originSize) => new Promise(resolve =>
+const cropImage = async (imagePath) => 
 {
-    var squareSize = Math.min(originSize.width, originSize.height);
+    var [width, height] = await getImageSize(imagePath);
+    var squareSize = Math.min(width, height);
     var offsetX;
     var offsetY;
 
-    if (squareSize == originSize.width)
+    if (squareSize == width)
     {
         offsetX = 0;
-        offsetY = (originSize.height - squareSize) / 2;
+        offsetY = (height - squareSize) / 2;
     }
     else
     {
-        offsetX = (originSize.width - squareSize) / 2;
+        offsetX = (width - squareSize) / 2;
         offsetY = 0;
     }
-
-    var displaySize =
-    {
-        width: Dimensions.get('window').width * SIZE_SCALE,
-        height: Dimensions.get('window').width * SIZE_SCALE,
-    };
-
-    console.log("display scale", displaySize)
 
     var cropData = {
         offset: { x: offsetX, y: offsetY },
         size: { width: squareSize, height: squareSize },
-        displaySize: { width: Dimensions.get('window').width, height: Dimensions.get('window').width },
+        // displaySize: { width: Dimensions.get('window').width, height: Dimensions.get('window').width },
     };
 
+    return await getCropImage(imagePath, cropData);
+}
+
+const getCropImage = async (imagePath, cropData) => new Promise(resolve =>
+{
     ImageEditor.cropImage(imagePath, cropData).then(url =>
     {
         resolve(url);
@@ -59,4 +52,4 @@ const getImageSize = async (imagePath) => new Promise(resolve =>
 })
 
 
-export default { getResizeImage, SIZE_SCALE};
+export default { getResizeImage, getImageSize };
