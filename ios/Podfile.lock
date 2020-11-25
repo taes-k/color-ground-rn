@@ -260,6 +260,8 @@ PODS:
   - react-native-image-editor (2.3.0):
     - React
     - React-RCTImage
+  - react-native-image-picker (2.3.4):
+    - React-Core
   - react-native-safe-area-context (3.1.8):
     - React-Core
   - react-native-view-shot (3.1.2):
@@ -389,6 +391,7 @@ DEPENDENCIES:
   - "react-native-cameraroll (from `../node_modules/@react-native-community/cameraroll`)"
   - react-native-get-pixel-color (from `../node_modules/react-native-get-pixel-color`)
   - "react-native-image-editor (from `../node_modules/@react-native-community/image-editor`)"
+  - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-view-shot (from `../node_modules/react-native-view-shot`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -466,6 +469,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-get-pixel-color"
   react-native-image-editor:
     :path: "../node_modules/@react-native-community/image-editor"
+  react-native-image-picker:
+    :path: "../node_modules/react-native-image-picker"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-view-shot:
@@ -537,6 +542,7 @@ SPEC CHECKSUMS:
   react-native-cameraroll: 9d2b7c1707204d2040d2812f960c6cebdbd9f670
   react-native-get-pixel-color: 68005d505be66fd0329f65e67b2a3db83154fde3
   react-native-image-editor: bd67912f38a8e7a895bf6eb8f445acdcefd8fd0c
+  react-native-image-picker: 32d1ad2c0024ca36161ae0d5c2117e2d6c441f11
   react-native-safe-area-context: 01158a92c300895d79dee447e980672dc3fb85a6
   react-native-view-shot: 08c46c9e8e92f6681e8f2ffa55ac3d06e7e99070
   React-RCTActionSheet: 53ea72699698b0b47a6421cb1c8b4ab215a774aa
