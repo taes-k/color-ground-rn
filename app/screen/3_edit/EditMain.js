@@ -1,9 +1,10 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, Button, Image, ImageBackground, Alert, TouchableOpacity, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
 import CameraRoll from "@react-native-community/cameraroll";
 import ViewShot from 'react-native-view-shot';
 import GetPixelColor from 'react-native-get-pixel-color';
+import Toast from 'react-native-toast-message';
 
 import FlexStyles from '../../style/FlexStyleSheet';
 import ExtractImageColor from './ExtractImageColor';
@@ -14,6 +15,11 @@ const EditMain = ({ navigation, route }) =>
 {
   const { imagePath } = route.params;
   const [imageScale, setImageScale] = useState(1);
+  const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
+
+  const [toastReady, setToastReady] = useState(false);
+  const [toastMessageText, setToastMessageText] = useState('');
+  const [toastMessageOffsetY, setToastMessageOffsetY] = useState(0);
 
   const [initialReady, setInitialReady] = useState(false);
 
@@ -40,28 +46,29 @@ const EditMain = ({ navigation, route }) =>
   useEffect(() =>
   {
     console.log("INITAIL READY 2:", initialReady);
-    async function initColors()
+    async function initEdit()
     {
       await InitialColor.getInitial3Colors(imagePath, (x) => { setInitialReady(x) }, (x) => { setInitial3Colors(x) });
+
       var [width, height] = await ImagePreprocessor.getImageSize(imagePath);
+      var scale = width / Dimensions.get('window').width;
 
-      var scale = width/Dimensions.get('window').width;
-
-      console.log("scale",scale);
+      console.log("scale", scale);
       setImageScale(scale);
       setInitialReady(true);
     }
     if (initialReady == false)
     {
       GetPixelColor.setImage(imagePath);
-      initColors();
+      initEdit();
     }
     else
     {
       setInitialColorChips();
+      setBackgroundColor(`rgba(${initial3Colors[0].red}, ${initial3Colors[0].green}, ${initial3Colors[0].blue}, 0.5)`);
+
     }
   }, [initialReady]);
-
 
   var colorChip1Style = {};
   var colorChip1Style = {};
@@ -78,26 +85,115 @@ const EditMain = ({ navigation, route }) =>
     setColorChip3(initial3Colors[2]);
   }
 
+  var backgroundColorStyle = {
+    backgroundColor: backgroundColor,
+  }
+
   var colorChip1Style = {
     backgroundColor: colorChip1.hexColor,
     borderColor: '#FFFFFF',
     borderStyle: 'solid',
-    borderWidth: pickedColorChipNumber == 1 & pickColorChipDisplay ? 1 : 0,
+    borderWidth: pickedColorChipNumber == 1 & pickColorChipDisplay ? 2 : 0,
   }
 
   var colorChip2Style = {
     backgroundColor: colorChip2.hexColor,
     borderColor: '#FFFFFF',
     borderStyle: 'solid',
-    borderWidth: pickedColorChipNumber == 2 & pickColorChipDisplay ? 1 : 0,
+    borderWidth: pickedColorChipNumber == 2 & pickColorChipDisplay ? 2 : 0,
   }
 
   var colorChip3Style = {
     backgroundColor: colorChip3.hexColor,
     borderColor: '#FFFFFF',
     borderStyle: 'solid',
-    borderWidth: pickedColorChipNumber == 3 & pickColorChipDisplay ? 1 : 0,
+    borderWidth: pickedColorChipNumber == 3 & pickColorChipDisplay ? 2 : 0,
   }
+
+
+  // ---------------------------------------------------------------------------------------------
+  // toast message
+  // ---------------------------------------------------------------------------------------------
+
+  useEffect(() =>
+  {
+    if (initialReady == true && toastReady == false)
+    {
+      setToastPosition();
+    }
+    if (toastReady == true)
+    {
+      setToastMessageText('원을 눌러 원하는 컬러를 직접 선택해 보세요.');
+      console.log("AASDF");
+      showToastMessage();
+    }
+  }, [toastReady, initialReady]);
+
+
+  useEffect(() =>
+  {
+    if (pickColorChipDisplay == true)
+    {
+      setToastMessageText('원을 한번 더 누르면 편집 모드가 종료됩니다.');
+      showToastMessage();
+    }
+    else
+    {
+      Toast.hide({
+        onHide: () => { }
+      });
+    }
+  }, [pickColorChipDisplay]);
+
+  const cref = useRef();
+
+  const setToastPosition = () =>
+  {
+    cref.current.measure((width, height, px, py, fx, fy) =>
+    {
+      const location = {
+        fx: fx,
+        fy: fy,
+        px: px,
+        py: py,
+        width: width,
+        height: height
+      }
+      console.log(location);
+      console.log("SET OFFSET", fy)
+      setToastMessageOffsetY(fy);
+      setToastReady(true)
+    });
+  };
+
+  const showToastMessage = () =>
+  {
+    Toast.show({
+      topOffset: toastMessageOffsetY,
+      visibilityTime: 1000,
+    });
+  }
+
+  const toastConfig = {
+    success: (internalState) => (
+      <View style={{
+        height: 50, 
+        width: '100%',
+        backgroundColor: 'rgba(0,0,0,0.45)',
+        justifyContent: "center",
+        alignItems: "center",
+      }}>
+        <Text style={{
+          color: '#FFFFFF',
+          textAlignVertical: "center",
+          textAlign: "center"
+        }}>{toastMessageText}</Text>
+      </View>
+    ),
+    error: () => { },
+    info: () => { },
+    any_custom_type: () => { }
+  };
 
   // ---------------------------------------------------------------------------------------------
   // div snapshot
@@ -127,7 +223,7 @@ const EditMain = ({ navigation, route }) =>
 
   useEffect(() =>
   {
-    switch(pickedColorChipNumber)
+    switch (pickedColorChipNumber)
     {
       case 1:
         setColorChip1(pickColorChip);
@@ -138,7 +234,7 @@ const EditMain = ({ navigation, route }) =>
       case 3:
         setColorChip3(pickColorChip);
         break;
-        
+
     }
   }, [pickColorChip])
 
@@ -208,7 +304,7 @@ const EditMain = ({ navigation, route }) =>
 
       var color;
       GetPixelColor
-        .pickColorAt(Math.round(coordX*imageScale), Math.round(coordY*imageScale))
+        .pickColorAt(Math.round(coordX * imageScale), Math.round(coordY * imageScale))
         .then(res =>
         {
           color = res;
@@ -220,12 +316,9 @@ const EditMain = ({ navigation, route }) =>
   var pickChipStyle = {
     position: 'absolute',
     backgroundColor: pickColorChip.hexColor,
-    left: pickColorChip.coordX - 22,
-    top: pickColorChip.coordY - 22,
+    left: pickColorChip.coordX - 25,
+    top: pickColorChip.coordY - 25,
     display: pickColorChipDisplay == true ? 'flex' : 'none',
-    borderColor: '#FFFFFF',
-    borderStyle: 'solid',
-    borderWidth: 1,
   };
 
   const movePickColorChip = (x, y, color) =>
@@ -241,12 +334,12 @@ const EditMain = ({ navigation, route }) =>
 
   // ---------------------------------------------------------------------------------------------
   return (
-    <SafeAreaView style={[FlexStyles.flex_1]} >
-      <View style={[FlexStyles.flex_4]}>
+    <SafeAreaView style={[FlexStyles.flex_1, backgroundColorStyle]} >
+      <Toast config={toastConfig} ref={(ref) => Toast.setRef(ref)} />
+      <View style={[FlexStyles.flex_1]} ref={cref} >
         <View style={[styles.option_tap]}>
 
         </View>
-
         <ViewShot ref={snapshotTarget} style={[styles.image_container]}>
           <ImageBackground
             style={[styles.image_view]}
@@ -254,7 +347,9 @@ const EditMain = ({ navigation, route }) =>
             onStartShouldSetResponder={(ev) => true}
             onResponderGrant={onPhotoTouchEvent.bind(this, "onResponderGrant")}
             onResponderMove={onPhotoTouchEvent.bind(this, "onResponderMove")}>
-            <View style={[styles.color_chip, pickChipStyle]}></View>
+            <View style={[styles.color_pick_chip, pickChipStyle]}>
+              <Text style={[styles.color_pick_chip_text]}>+</Text>
+            </View>
             <View style={[styles.color_chip_box]}>
               <TouchableOpacity
                 style={[styles.color_chip, colorChip1Style]}
@@ -271,20 +366,36 @@ const EditMain = ({ navigation, route }) =>
             </View>
           </ImageBackground>
         </ViewShot>
+      <View style={[FlexStyles.flex_1, styles.edit_bottom]}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+            <Image 
+            source={require('./images/cancel.png')}
+            style={[styles.edit_bottom_image]}
+            />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => onCapture()}>
+            <Image 
+            source={require('./images/download.png')}
+            style={[styles.edit_bottom_image]}
+            />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.8}>
+            <Image 
+            source={require('./images/share.png')}
+            style={[styles.edit_bottom_image]}
+            />
+        </TouchableOpacity>
+      </View>
       </View>
 
-      <View style={[FlexStyles.flex_2]}>
-        <Button title="Go back" onPress={() => navigation.goBack()} />
-        <Button title="save" onPress={() => onCapture()} />
-      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   option_tap: {
-    backgroundColor: 'blue',
-    height: 60
+    // backgroundColor: 'blue',
+    height: 50
   },
   image_container: {
     flexDirection: 'row',
@@ -309,6 +420,34 @@ const styles = StyleSheet.create({
     borderRadius: 44 / 2,
     backgroundColor: 'red',
     marginRight: 15,
+  },
+  color_pick_chip: {
+    width: 50,
+    height: 50,
+    borderRadius: 50 / 2,
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: '#FFFFFF',
+    borderStyle: 'solid',
+    borderWidth: 2,
+
+  },
+  color_pick_chip_text: {
+    fontSize: 25,
+    fontWeight: "200",
+    color: "white",
+    textAlignVertical: "center",
+    textAlign: "center"
+  },
+  edit_bottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+
+  edit_bottom_image:{
+    width:30,
+    height: 30
   }
 });
 
