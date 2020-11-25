@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, TouchableHighlight, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RNCamera } from 'react-native-camera';
+import imagePicker from 'react-native-image-picker'
 
 import FlexStyles from '../../style/FlexStyleSheet'
 
@@ -52,7 +53,15 @@ const CameraMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   const goToAlbum = () =>
   {
-    navigation.navigate('Album', {});
+    const options = {noData: true};
+
+    imagePicker.launchImageLibrary(options, response => {
+      console.log("response", response);
+      
+      ImagePreprocessor.getResizeImage(response.uri).then(
+        res => navigation.navigate('Edit', { imagePath: res })
+      );
+    })
   };
 
   return (
