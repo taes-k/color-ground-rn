@@ -8,20 +8,29 @@ import Edit from '../3_edit/EditMain';
 
 const Stack = createStackNavigator();
 
-function AppMainStack() {
+function AppMainStack()
+{
 
     return (
         <Stack.Navigator
-            headerMode="none">
+            headerMode="none"
+        >
 
             <Stack.Screen
                 name="Camera"
                 component={Camera}
-                options={{  }} />
-            
-            <Stack.Screen 
-                name="Edit" 
-                component={Edit}  />
+                options={{
+                    animationEnabled: false,
+                    gestureEnabled: false
+                }} />
+
+            <Stack.Screen
+                name="Edit"
+                component={Edit}
+                options={{
+                    animationEnabled: false,
+                    gestureEnabled: false
+                }} />
 
             {/* <Stack.Screen 
                 name="Album" 
