@@ -1,32 +1,92 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, TouchableHighlight, Animated } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { AsyncStorage, StyleSheet, Text, View, Button, TouchableHighlight, Animated, Alert } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RNCamera } from 'react-native-camera';
+
+import * as ColoringLimitActions from '../../store/actions/ColoringLimit';
 import imagePicker from 'react-native-image-picker'
 
 import FlexStyles from '../../style/FlexStyleSheet'
-
 import ImagePreprocessor from '../3_edit/function/ImagePreprocessor'
 const CameraMain = ({ navigation, route }) =>
 {
+  const dispatch = useDispatch();
+  const coloringLimitCount = useSelector((state) => state.coloringLimit.count);
   const [cameraSize, setCameraSize] = useState(1);
   const cameraRef = React.useRef(null);
+
+
+  // ---------------------------------------------------------------------------------------------
+  // coloringLimitCount
+  // ---------------------------------------------------------------------------------------------
+
+  const adAlert = () =>
+  Alert.alert(
+    "광고보면 10개 충전!",
+    "",
+    [
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel"
+      },
+      { text: "OK", onPress: () => {
+        dispatch(ColoringLimitActions.addCount(10));
+        console.log("OK Pressed") }
+      }
+    ],
+    { cancelable: false }
+  );
+
+  const checkColoringLimitCount = () =>
+  {
+    console.log("AAAA",coloringLimitCount);
+    if (coloringLimitCount <= 0)
+    {
+      console.log("BBB");
+      return false;
+    }
+    return true;
+  }
+
+  const useColoringLimitCount = () =>
+  {
+    dispatch(ColoringLimitActions.useCount());
+  }
 
   // ---------------------------------------------------------------------------------------------
   // take photo
   // ---------------------------------------------------------------------------------------------
   const takePhoto = async () =>
   {
-    console.log('cameraRef', cameraRef);
-    if (cameraRef)
+    if (checkColoringLimitCount())
     {
-      const data = await cameraRef.current.takePictureAsync({
-        quality: 1,
-        exif: true,
-      });
+      if (cameraRef)
+      {
+        const data = await cameraRef.current.takePictureAsync({
+          quality: 1,
+          exif: true,
+        });
 
-      var resizeImageurl = await ImagePreprocessor.getResizeImage(data.uri);
-      navigation.navigate('Edit', { imagePath: resizeImageurl });
+        // var resizeImageurl = await ImagePreprocessor.getResizeImage(data.uri);
+
+        // useColoringLimitCount();
+        // navigation.navigate('Edit', { imagePath: resizeImageurl });
+
+
+        ImagePreprocessor.getResizeImage(data.uri).then(
+          res => {
+            useColoringLimitCount();
+            navigation.navigate('Edit', { imagePath: res })}
+        );
+      }
+    }
+    else
+    {
+      adAlert();
+      // alert("광고보세요!");
+      // 광고팝업창
     }
   };
 
@@ -35,19 +95,31 @@ const CameraMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   const goToAlbum = () =>
   {
-    const options = { noData: true };
 
-    imagePicker.launchImageLibrary(options, response =>
+    if (checkColoringLimitCount())
     {
-      // console.log("response", response);
+      const options = { noData: true };
 
-      if (response != null && response.uri != null)
+      imagePicker.launchImageLibrary(options, response =>
       {
-        ImagePreprocessor.getResizeImage(response.uri).then(
-          res => navigation.navigate('Edit', { imagePath: res })
-        );
-      }
-    })
+        // console.log("response", response);
+
+        if (response != null && response.uri != null)
+        {
+          ImagePreprocessor.getResizeImage(response.uri).then(
+            res => {
+              useColoringLimitCount();
+              navigation.navigate('Edit', { imagePath: res })}
+          );
+        }
+      })
+    }
+    else
+    {
+      // alert("광고보세요!");
+      // 광고팝업창
+      adAlert();
+    }
   };
 
   return (
@@ -56,7 +128,8 @@ const CameraMain = ({ navigation, route }) =>
         <View style={[styles.option_tap]}>
           <Button title='플래시' />
           <Button title='타이머' />
-          <Button title='27' />
+          <Text>{coloringLimitCount}</Text>
+          {/* <Button title={coloringLimitCount} /> */}
         </View>
         <View style={[styles.camera_container]}>
           <RNCamera

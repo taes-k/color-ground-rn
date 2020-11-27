@@ -68,6 +68,8 @@ const EditMain = ({ navigation, route }) =>
       setBackgroundColor(`rgba(${initial3Colors[0].red}, ${initial3Colors[0].green}, ${initial3Colors[0].blue}, 0.5)`);
 
     }
+
+    return () => setInitialReady(true);
   }, [initialReady]);
 
   var colorChip1Style = {};

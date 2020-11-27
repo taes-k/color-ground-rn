@@ -10,8 +10,10 @@ export default (state = initialState, action) =>
     {
         case actions.READY_COMPLETE:
             state.isReady = true;
+            break;
         default:
         // do nothing
+            break;
     }
 
     return state;
