@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>399839786751-eqj8bhsiku72dfh95ro861q3085oeolb.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.399839786751-eqj8bhsiku72dfh95ro861q3085oeolb</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDnIbNhVVOZ1mg2GQ8vJbnea4-Fbtbg0M4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>399839786751</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>org.reactjs.native.example.ColorGround</string>
+	<key>PROJECT_ID</key>
+	<string>colorground-baa44</string>
+	<key>STORAGE_BUCKET</key>
+	<string>colorground-baa44.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:399839786751:ios:4b94d9fe599eaf6cbbbeca</string>
+	<key>DATABASE_URL</key>
+	<string>https://colorground-baa44.firebaseio.com</string>
+</dict>
+</plist>

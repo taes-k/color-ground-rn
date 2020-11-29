@@ -45,7 +45,6 @@ const EditMain = ({ navigation, route }) =>
 
   useEffect(() =>
   {
-    console.log("INITAIL READY 2:", initialReady);
     async function initEdit()
     {
       await InitialColor.getInitial3Colors(imagePath, (x) => { setInitialReady(x) }, (x) => { setInitial3Colors(x) });
@@ -53,7 +52,6 @@ const EditMain = ({ navigation, route }) =>
       var [width, height] = await ImagePreprocessor.getImageSize(imagePath);
       var scale = width / Dimensions.get('window').width;
 
-      console.log("scale", scale);
       setImageScale(scale);
       setInitialReady(true);
     }
@@ -78,10 +76,6 @@ const EditMain = ({ navigation, route }) =>
 
   const setInitialColorChips = () =>
   {
-    console.log("initailColor1", initial3Colors[0]);
-    console.log("initailColor2", initial3Colors[1]);
-    console.log("initailColor3", initial3Colors[2]);
-
     setColorChip1(initial3Colors[0]);
     setColorChip2(initial3Colors[1]);
     setColorChip3(initial3Colors[2]);
@@ -126,7 +120,6 @@ const EditMain = ({ navigation, route }) =>
     if (toastReady == true)
     {
       setToastMessageText('원을 눌러 원하는 컬러를 직접 선택해 보세요.');
-      console.log("AASDF");
       showToastMessage();
     }
   }, [toastReady, initialReady]);
@@ -161,8 +154,6 @@ const EditMain = ({ navigation, route }) =>
         width: width,
         height: height
       }
-      console.log(location);
-      console.log("SET OFFSET", fy)
       setToastMessageOffsetY(fy);
       setToastReady(true)
     });
@@ -206,7 +197,6 @@ const EditMain = ({ navigation, route }) =>
     setPickColorChipDisplay(false);
     snapshotTarget.current.capture().then(uri =>
     {
-      console.log(uri);
       saveImage(uri);
     });
   }, []);

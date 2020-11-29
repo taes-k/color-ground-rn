@@ -3,40 +3,33 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import Camera from '../1_camera/CameraMainNavigator';
-import Edit from '../3_edit/EditMain';
+import CameraMain from './CameraMain';
+import RewardMain from './RewardMain';
 
 const Stack = createStackNavigator();
 
-function AppMainStack()
+function CameraMainNavigator()
 {
 
     return (
-        <Stack.Navigator
-            headerMode="none"
-        >
-
+        <Stack.Navigator headerMode="none"  mode="modal">
             <Stack.Screen
-                name="Camera"
-                component={Camera}
+                name="CameraMain"
+                component={CameraMain}
                 options={{
                     animationEnabled: false,
                     gestureEnabled: false
                 }} />
 
             <Stack.Screen
-                name="Edit"
-                component={Edit}
+                name="RewardMain"
+                component={RewardMain}
                 options={{
-                    animationEnabled: false,
+                    animationEnabled: true,
                     gestureEnabled: false
                 }} />
-
-            {/* <Stack.Screen 
-                name="Album" 
-                component={Album}  /> */}
         </Stack.Navigator>
     );
 }
 
-export default AppMainStack;
+export default CameraMainNavigator;
