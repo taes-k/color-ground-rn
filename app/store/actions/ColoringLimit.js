@@ -3,6 +3,7 @@ export const COLORING_LIMIT_COUNT = 'COLORING_LIMIT_COUNT';
 export const SET_COUNT = 'SET_COUNT';
 export const USE_COUNT = 'USE_COUNT';
 export const ADD_COUNT = 'ADD_COUNT';
+export const ERROR_ADD_COUNT = 'ERROR_ADD_COUNT';
 
 export const setCount = (cnt) => {
   return {
@@ -20,6 +21,12 @@ export const useCount = () => {
 export const addCount = (cnt) => {
   return {
     type: ADD_COUNT, 
+    count: cnt,
+  }
+};
+export const addErrorCount = (cnt) => {
+  return {
+    type: ERROR_ADD_COUNT, 
     count: cnt,
   }
 };

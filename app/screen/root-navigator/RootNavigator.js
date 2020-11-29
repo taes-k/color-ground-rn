@@ -13,6 +13,7 @@ const RootStack = createStackNavigator();
 
 function RootNavigator()
 {
+    const STANDARD_COUNT = 3;
     const dispatch = useDispatch();
 
     const isReady = useSelector((state) => state.appReady.isReady);
@@ -27,7 +28,7 @@ function RootNavigator()
 
     getColoringLimitCount = async () =>
     {
-        var count = 10;
+        var count = STANDARD_COUNT;
         try
         {
             count = await AsyncStorage.getItem(String(ColoringLimitActions.COLORING_LIMIT_COUNT));
@@ -41,7 +42,7 @@ function RootNavigator()
             else
             {
                 console.log("there's no local coloringlimitcount data");
-                count = 10;
+                count = STANDARD_COUNT;
             }
         }
         catch (err)
