@@ -16,8 +16,7 @@ const RewardMain = ({ navigation, route }) =>
     // google admob reward advertise
     // ---------------------------------------------------------------------------------------------
 
-    const adUnitId = __DEV__ ? 'ca-app-pub-8392395015115496~7322378671' : 'ca-app-pub-8392395015115496~7322378671';
-    // const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-3940256099942544/1712485313';
+    const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-3940256099942544/1712485313';
 
     const rewarded = RewardedAd.createForAdRequest(adUnitId, {
         requestNonPersonalizedAdsOnly: true,
@@ -80,7 +79,7 @@ const RewardMain = ({ navigation, route }) =>
                             style={[styles.option_tap_image]}
                         />
                     </View>
-                    <Text>{coloringLimitCount}</Text>
+                    <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
                 </View>
                 <View style={[styles.reward_container]}>
                     <TouchableOpacity style={[FlexStyles.flex_1, styles.reward]} activeOpacity={0.8} onPress={() => showAd()}>
@@ -107,6 +106,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-around',
+    },
+    reaward_counter_text: {
+      fontSize:17,
     },
 
     option_tap_image: {
