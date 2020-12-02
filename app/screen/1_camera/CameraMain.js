@@ -272,7 +272,7 @@ const CameraMain = ({ navigation, route }) =>
               style={[styles.color_chip]}
             />
             <View
-              style={[styles.color_chip]}
+              style={[styles.color_chip, styles.color_chip_mid]}
             />
             <View
               style={[styles.color_chip]}
@@ -344,10 +344,13 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 44 / 2,
-    marginRight: 15,
     borderColor: '#FFFFFF',
     borderStyle: 'dotted',
     borderWidth: 1,
+  },
+  color_chip_mid: {
+    marginLeft: 15,
+    marginRight: 15,
   },
   timer_counter: {
     color:'#FFFFFF',

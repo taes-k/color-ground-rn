@@ -4,7 +4,7 @@ import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context
 import CameraRoll from "@react-native-community/cameraroll";
 import ViewShot from 'react-native-view-shot';
 import GetPixelColor from 'react-native-get-pixel-color';
-import Toast from 'react-native-toast-message';
+import Share from 'react-native-share';
 
 import FlexStyles from '../../style/FlexStyleSheet';
 import ExtractImageColor from './ExtractImageColor';
@@ -17,9 +17,8 @@ const EditMain = ({ navigation, route }) =>
   const [imageScale, setImageScale] = useState(1);
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
 
-  const [toastReady, setToastReady] = useState(false);
-  const [toastMessageText, setToastMessageText] = useState('');
-  const [toastMessageOffsetY, setToastMessageOffsetY] = useState(0);
+  const [showToast, setShowToast] = useState(true);
+  const [toastMessageText, setToastMessageText] = useState('원을 눌러 원하는 컬러를 직접 선택해보세요.');
 
   const [initialReady, setInitialReady] = useState(false);
 
@@ -106,87 +105,13 @@ const EditMain = ({ navigation, route }) =>
     borderWidth: pickedColorChipNumber == 3 & pickColorChipDisplay ? 2 : 0,
   }
 
-
   // ---------------------------------------------------------------------------------------------
   // toast message
   // ---------------------------------------------------------------------------------------------
 
-  useEffect(() =>
-  {
-    if (initialReady == true && toastReady == false)
-    {
-      setToastPosition();
-    }
-    if (toastReady == true)
-    {
-      setToastMessageText('원을 눌러 원하는 컬러를 직접 선택해 보세요.');
-      showToastMessage();
-    }
-  }, [toastReady, initialReady]);
-
-
-  useEffect(() =>
-  {
-    if (pickColorChipDisplay == true)
-    {
-      setToastMessageText('원을 한번 더 누르면 편집 모드가 종료됩니다.');
-      showToastMessage();
-    }
-    else
-    {
-      Toast.hide({
-        onHide: () => { }
-      });
-    }
-  }, [pickColorChipDisplay]);
-
-  const cref = useRef();
-
-  const setToastPosition = () =>
-  {
-    cref.current.measure((width, height, px, py, fx, fy) =>
-    {
-      const location = {
-        fx: fx,
-        fy: fy,
-        px: px,
-        py: py,
-        width: width,
-        height: height
-      }
-      setToastMessageOffsetY(fy);
-      setToastReady(true)
-    });
-  };
-
-  const showToastMessage = () =>
-  {
-    Toast.show({
-      topOffset: toastMessageOffsetY,
-      visibilityTime: 1000,
-    });
+  const toastContainerStyle = {
+    display: showToast ? 'flex' : 'none',
   }
-
-  const toastConfig = {
-    success: (internalState) => (
-      <View style={{
-        height: 50, 
-        width: '100%',
-        backgroundColor: 'rgba(0,0,0,0.45)',
-        justifyContent: "center",
-        alignItems: "center",
-      }}>
-        <Text style={{
-          color: '#FFFFFF',
-          textAlignVertical: "center",
-          textAlign: "center"
-        }}>{toastMessageText}</Text>
-      </View>
-    ),
-    error: () => { },
-    info: () => { },
-    any_custom_type: () => { }
-  };
 
   // ---------------------------------------------------------------------------------------------
   // div snapshot
@@ -195,11 +120,16 @@ const EditMain = ({ navigation, route }) =>
   const onCapture = useCallback(() =>
   {
     setPickColorChipDisplay(false);
+    captureImage().then(res => saveImage(res));
+  }, []);
+
+  const captureImage = () => new Promise(resolve =>
+  {
     snapshotTarget.current.capture().then(uri =>
     {
-      saveImage(uri);
+      resolve(uri);
     });
-  }, []);
+  })
 
   const saveImage = async (imgUri) =>
   {
@@ -207,6 +137,37 @@ const EditMain = ({ navigation, route }) =>
     // CameraRoll.save(imgUri, config);
     const result = await CameraRoll.save(imgUri);
     Alert.alert("사진이 갤러리에 저장되었습니다.");
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // share image
+  // ---------------------------------------------------------------------------------------------
+
+  const shareImage = () =>
+  {
+    captureImage().then(res =>
+    {
+      openShare(res);
+    })
+
+
+  }
+
+  const openShare = async (imgUri) =>
+  {
+    const options = {
+      url: imgUri,
+    };
+
+    Share.open(options)
+      .then((res) =>
+      {
+        console.log(res);
+      })
+      .catch((err) =>
+      {
+        err && console.log(err);
+      });
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -232,6 +193,7 @@ const EditMain = ({ navigation, route }) =>
 
   const onColorchipTouchEvent = (number) =>
   {
+    setToastMessageText('원을 한번 더 누르면 편집 모드가 종료됩니다.');
 
     if (pickColorChipDisplay == false || pickedColorChipNumber != number)
     {
@@ -284,6 +246,7 @@ const EditMain = ({ navigation, route }) =>
     else
     {
       setPickColorChipDisplay(false);
+      setShowToast(false);
     }
   }
 
@@ -327,10 +290,26 @@ const EditMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   return (
     <SafeAreaView style={[FlexStyles.flex_1, backgroundColorStyle]} >
-      <Toast config={toastConfig} ref={(ref) => Toast.setRef(ref)} />
-      <View style={[FlexStyles.flex_1]} ref={cref} >
+      <View style={[FlexStyles.flex_1]} >
         <View style={[styles.option_tap]}>
-
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../../images/cancel.png')}
+              style={[styles.edit_button_image]}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => onCapture()}>
+            <Image
+              source={require('../../images/download.png')}
+              style={[styles.edit_button_image]}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => shareImage()}>
+            <Image
+              source={require('../../images/share.png')}
+              style={[styles.edit_button_image]}
+            />
+          </TouchableOpacity>
         </View>
         <ViewShot ref={snapshotTarget} style={[styles.image_container]}>
           <ImageBackground
@@ -348,7 +327,7 @@ const EditMain = ({ navigation, route }) =>
                 onPress={() => onColorchipTouchEvent(1)}
               />
               <TouchableOpacity
-                style={[styles.color_chip, colorChip2Style]}
+                style={[styles.color_chip, styles.color_chip_mid, colorChip2Style]}
                 onPress={() => onColorchipTouchEvent(2)}
               />
               <TouchableOpacity
@@ -358,26 +337,35 @@ const EditMain = ({ navigation, route }) =>
             </View>
           </ImageBackground>
         </ViewShot>
-      <View style={[FlexStyles.flex_1, styles.edit_bottom]}>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
-            <Image 
-            source={require('./images/cancel.png')}
-            style={[styles.edit_bottom_image]}
-            />
-        </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => onCapture()}>
-            <Image 
-            source={require('./images/download.png')}
-            style={[styles.edit_bottom_image]}
-            />
-        </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8}>
-            <Image 
-            source={require('./images/share.png')}
-            style={[styles.edit_bottom_image]}
-            />
-        </TouchableOpacity>
-      </View>
+        <View style={[FlexStyles.flex_1, styles.edit_bottom]}>
+          <View style={[toastContainerStyle, styles.toast_container]}>
+            <Text style={[styles.toast_text]}>{toastMessageText}</Text>
+          </View>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
+            {/* for align space */}
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
+            <View style={[styles.edit_bottom_button]} >
+              <Image
+                source={require('../../images/text.png')}
+                style={[styles.edit_button_image]}
+              />
+            </View>
+            <Text style={[styles.edit_bottom_button_text]}>Text</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
+            <View style={[styles.edit_bottom_button]} >
+              <Image
+                source={require('../../images/shuffle.png')}
+                style={[styles.edit_button_image]}
+              />
+            </View>
+            <Text style={[styles.edit_bottom_button_text]}>shuffle</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
+            {/* for align space */}
+          </TouchableOpacity>
+        </View>
       </View>
 
     </SafeAreaView>
@@ -385,9 +373,16 @@ const EditMain = ({ navigation, route }) =>
 }
 
 const styles = StyleSheet.create({
+
   option_tap: {
-    // backgroundColor: 'blue',
-    height: 50
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  edit_button_image: {
+    width: 30,
+    height: 30
   },
   image_container: {
     flexDirection: 'row',
@@ -410,7 +405,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 44 / 2,
-    backgroundColor: 'red',
+  },
+  color_chip_mid: {
+    marginLeft: 15,
     marginRight: 15,
   },
   color_pick_chip: {
@@ -422,7 +419,6 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
     borderStyle: 'solid',
     borderWidth: 2,
-
   },
   color_pick_chip_text: {
     fontSize: 25,
@@ -432,15 +428,43 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   edit_bottom: {
+    position: 'relative',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
   },
+  toast_container: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 40,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
 
-  edit_bottom_image:{
-    width:30,
-    height: 30
-  }
+  },
+  toast_text: {
+    fontSize: 15,
+    color: '#FFFFFF'
+
+  },
+  edit_bottom_button_container: {
+    alignItems: 'center',
+  },
+  edit_bottom_button: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: '#000000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  edit_bottom_button_text: {
+    marginTop: 15,
+    fontSize: 13,
+  },
 });
 
 export default EditMain;
