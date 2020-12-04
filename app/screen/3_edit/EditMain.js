@@ -1,13 +1,15 @@
 import React, { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { StyleSheet, Text, View, Button, Image, ImageBackground, Alert, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, ImageBackground, TextInput, Alert, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
 import CameraRoll from "@react-native-community/cameraroll";
 import ViewShot from 'react-native-view-shot';
 import GetPixelColor from 'react-native-get-pixel-color';
 import Share from 'react-native-share';
+import Modal from 'react-native-modal';
+import Geolocation from '@react-native-community/geolocation';
 
+import TextModal from './TextModal';
 import FlexStyles from '../../style/FlexStyleSheet';
-import ExtractImageColor from './ExtractImageColor';
 import InitialColor from './function/InitialColor';
 import ImagePreprocessor from './function/ImagePreprocessor';
 
@@ -37,6 +39,9 @@ const EditMain = ({ navigation, route }) =>
   const [pickColorChipDisplay, setPickColorChipDisplay] = useState(false);
   const [pickedColorChipNumber, setPickedColorChipNumber] = useState(0);
 
+  const [gpsAddressList, setGpsAddressList] = useState([]);
+  const [textModalShow, setTextModalShow] = useState(false);
+  const [textValue, setTextValue] = useState('');
 
   // ---------------------------------------------------------------------------------------------
   // initial colorchip setting
@@ -250,12 +255,17 @@ const EditMain = ({ navigation, route }) =>
     }
   }
 
+  const viewWidth = Dimensions.get('window').width;
+
   const onPhotoTouchEvent = (name, ev) =>
   {
     if (pickColorChipDisplay == true)
     {
       coordX = ev.nativeEvent.locationX;
       coordY = ev.nativeEvent.locationY;
+
+      if (coordY < 0) coordY = 0;
+      if (coordY > viewWidth) coordY = viewWidth - 1;
 
       var color;
       GetPixelColor
@@ -286,6 +296,94 @@ const EditMain = ({ navigation, route }) =>
     var scale = 1;
 
   }
+
+  // ---------------------------------------------------------------------------------------------
+  // pick colorchip setting
+  // ---------------------------------------------------------------------------------------------
+
+  const GOOGLE_MAP_API_KEY = "AIzaSyA1Afj2Dqfq8uwdaxIT5GuGhE6o7DEZsJ8";
+
+  useEffect(() =>
+  {
+    Geolocation.getCurrentPosition(info =>
+    {
+      getNearByPlace(info.coords.latitude + "," + info.coords.longitude);
+    });
+  }, [])
+
+  const showTextSettingModal = () =>
+  {
+    setTextModalShow(true);
+  }
+
+  const hideTextSettingModal= () =>
+  {
+    setTextModalShow(false);
+  }
+
+  const getNearByPlace = (coords) =>
+  {
+    const googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+    const locationParam = "location="
+    const radiusParam = "radius=1000";
+    const keyParam = "key=" + GOOGLE_MAP_API_KEY;
+
+    const callUrl = googlePlaceUrl + '?' + locationParam + coords + "&" + radiusParam + "&" + keyParam;
+
+    return fetch(callUrl)
+      .then((response) => response.json())
+      .then((json) =>
+      {
+        var addressList = [];
+        var results = json.results;
+
+        for (i = 0; i < results.length; i++)
+        {
+          addressList.push(results[i].name);
+        }
+        setGpsAddressList(addressList);
+      })
+      .catch((error) =>
+      {
+        console.error(error);
+      });
+  };
+
+  const setTextHHMMSS = () =>
+  {
+    var date = new Date();
+
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+
+    var text = hours + ":" + minutes + ":" + seconds;
+    setTextValue(text);
+  }
+
+  const setTextYYYYMMDD = () =>
+  {
+    var date = new Date();
+
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    var date = date.getDate();
+
+    if (month < 10)
+    {
+      month = '0' + month;
+    }
+    if (date < 10)
+    {
+      date = '0' + date;
+    }
+    var text = year + "." + month + "." + date;
+    setTextValue(text);
+  }
+
+  const gpsAddress1DisplayStyle = { display: gpsAddressList.length > 0 ? 'flex' : 'none' };
+  const gpsAddress2DisplayStyle = { display: gpsAddressList.length > 1 ? 'flex' : 'none' };
+  const gpsAddress3DisplayStyle = { display: gpsAddressList.length > 2 ? 'flex' : 'none' };
 
   // ---------------------------------------------------------------------------------------------
   return (
@@ -323,17 +421,23 @@ const EditMain = ({ navigation, route }) =>
             </View>
             <View style={[styles.color_chip_box]}>
               <TouchableOpacity
+                activeOpacity={1}
                 style={[styles.color_chip, colorChip1Style]}
                 onPress={() => onColorchipTouchEvent(1)}
               />
               <TouchableOpacity
+                activeOpacity={1}
                 style={[styles.color_chip, styles.color_chip_mid, colorChip2Style]}
                 onPress={() => onColorchipTouchEvent(2)}
               />
               <TouchableOpacity
+                activeOpacity={1}
                 style={[styles.color_chip, colorChip3Style]}
                 onPress={() => onColorchipTouchEvent(3)}
               />
+            </View>
+            <View style={[styles.text_tag_container]}>
+              <Text style={[styles.text_tag_text]}>{textValue}</Text>
             </View>
           </ImageBackground>
         </ViewShot>
@@ -344,7 +448,7 @@ const EditMain = ({ navigation, route }) =>
           <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
             {/* for align space */}
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8} onPress={() => showTextSettingModal()}>
             <View style={[styles.edit_bottom_button]} >
               <Image
                 source={require('../../images/text.png')}
@@ -368,6 +472,74 @@ const EditMain = ({ navigation, route }) =>
         </View>
       </View>
 
+
+
+      <Modal
+        isVisible={textModalShow}
+        // swipeDirection='up'
+        style={{ justifyContent: 'flex-end', margin: 0 }}
+        onSwipeComplete={() => hideTextSettingModal()}
+        swipeDirection={['up', 'down']}
+      onBackdropPress={() => hideTextSettingModal()}
+      >
+        <TouchableOpacity style={{ flex: 3 }} activeOpacity={0} onPress={() => hideTextSettingModal()}>
+          {/* for align space */}
+        </TouchableOpacity>
+        <View style={[styles.modal_container]}>
+          <View style={[styles.modal_option_tab]}>
+            <TouchableOpacity style={[FlexStyles.flex_1, styles.edit_bottom_button_container]} onPress={() => hideTextSettingModal()}>
+              <Image
+                source={require('../../images/cancel.png')}
+                style={[styles.edit_button_image]}
+              />
+            </TouchableOpacity>
+            <View style={[FlexStyles.flex_4, styles.modal_option_tab_text_container]}>
+              <Text style={[styles.modal_option_tab_text]} >Text</Text>
+            </View>
+            <View style={[FlexStyles.flex_1]} ></View>
+          </View>
+          <View style={FlexStyles.flex_1}>
+            <View style={[styles.modal_contents_text_input_container]}>
+              <View style={FlexStyles.flex_1} />
+              <TextInput
+                style={[FlexStyles.flex_4, styles.modal_contents_text_input]}
+                onChangeText={text => setTextValue(text)}
+                value={textValue}
+              />
+              <View style={FlexStyles.flex_1} />
+            </View>
+            <View style={FlexStyles.flex_1, styles.modal_text_select_button_container}>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity style={[styles.modal_text_select_button, gpsAddress1DisplayStyle]} activeOpacity={0.5} onPress={() => setTextValue(gpsAddressList[0])}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>{gpsAddressList[0]}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modal_text_select_button, gpsAddress2DisplayStyle]} activeOpacity={0.5} onPress={() => setTextValue(gpsAddressList[1])}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>{gpsAddressList[1]}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modal_text_select_button, gpsAddress3DisplayStyle]} activeOpacity={0.5} onPress={() => setTextValue(gpsAddressList[2])}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>{gpsAddressList[2]}</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextValue('@3XO')}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>3XO</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextHHMMSS()}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>hh:mm:ss</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextYYYYMMDD()}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>yyyy.mm.dd</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={[FlexStyles.flex_1, styles.modal_ok_button_container]}>
+              <TouchableOpacity style={[styles.modal_ok_button]} activeOpacity={0.8} onPress={() => hideTextSettingModal()}>
+                <Text style={[styles.modal_ok_button_text]}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -381,14 +553,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   edit_button_image: {
-    width: 30,
-    height: 30
+    width: 24,
+    height: 24
   },
   image_container: {
     flexDirection: 'row',
   },
   image_view: {
     flex: 1,
+    position: 'relative',
     aspectRatio: 1,
     position: 'relative',
     flexDirection: 'row',
@@ -427,6 +600,20 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
     textAlign: "center"
   },
+  text_tag_container: {
+    position: 'absolute',
+    left: 15,
+    top: 15,
+    borderBottomWidth:1,
+    borderBottomColor: '#FFFFFF',
+    borderStyle: 'solid'
+  },
+  text_tag_text: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    lineHeight: 13,
+
+  },
   edit_bottom: {
     position: 'relative',
     flexDirection: 'row',
@@ -464,6 +651,84 @@ const styles = StyleSheet.create({
   edit_bottom_button_text: {
     marginTop: 15,
     fontSize: 13,
+  },
+
+  modal_container: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    height: 500,
+  },
+  modal_option_tab: {
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  modal_option_tab_text_container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modal_option_tab_text: {
+    fontSize: 17,
+  },
+  modal_contents_text_input_container: {
+    flexDirection: 'row',
+    marginTop: 10,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modal_contents_text_input: {
+    textAlign: 'center',
+    height: 50,
+    borderBottomColor: '#000000',
+    borderStyle: 'solid',
+    borderBottomWidth: 1,
+  },
+
+  modal_text_select_button_container: {
+    paddingTop: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modal_text_select_button: {
+    paddingTop: 8,
+    paddingRight: 15,
+    paddingBottom: 8,
+    paddingLeft: 15,
+    marginTop: 10,
+    marginRight: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#000000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modal_text_select_button_text: {
+    fontSize: 15,
+    fontWeight: '300',
+    maxWidth: 90,
+  },
+
+  modal_ok_button_container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modal_ok_button: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: '#000000',
+    backgroundColor: '#000000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modal_ok_button_text: {
+    fontSize: 15,
+    fontWeight: '300',
+    color: '#FFFFFF',
   },
 });
 

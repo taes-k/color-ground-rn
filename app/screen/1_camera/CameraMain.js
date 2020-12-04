@@ -105,7 +105,7 @@ const CameraMain = ({ navigation, route }) =>
       }
       else
       {
-        resetTimer();
+        resetZeroTimer();
         resetFlash();
         takePhoto();
       }
@@ -117,6 +117,11 @@ const CameraMain = ({ navigation, route }) =>
   }, [runTakePhoto, timerCount]);
 
   const resetTimer = () => {
+    setRunTakePhoto(false);
+    setCameraTimer(cameraTimer);
+  }
+
+  const resetZeroTimer = () => {
     setRunTakePhoto(false);
     setCameraTimer(0);
   }
@@ -256,7 +261,7 @@ const CameraMain = ({ navigation, route }) =>
             />
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.8} onPress={() => { goToRewardAd() }}>
+          <TouchableOpacity style={[styles.reaward_counter_text_container]} activeOpacity={0.8} onPress={() => { goToRewardAd() }}>
             <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
           </TouchableOpacity>
         </View>
@@ -268,15 +273,9 @@ const CameraMain = ({ navigation, route }) =>
             captureAudio={false}
             style={[FlexStyles.flex_1, styles.camera]} />
           <View style={[styles.color_chip_box]}>
-            <View
-              style={[styles.color_chip]}
-            />
-            <View
-              style={[styles.color_chip, styles.color_chip_mid]}
-            />
-            <View
-              style={[styles.color_chip]}
-            />
+            <View style={[styles.color_chip]}/>
+            <View style={[styles.color_chip, styles.color_chip_mid]}/>
+            <View style={[styles.color_chip]}/>
           </View>
           <Text style={[timerCounterStyle, styles.timer_counter]}>{timerCount}</Text>
         </View>
@@ -307,7 +306,7 @@ const CameraMain = ({ navigation, route }) =>
 
 const styles = StyleSheet.create({
   background_style: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F5F6',
   },
 
   option_tap: {
@@ -316,8 +315,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
   },
+  reaward_counter_text_container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   reaward_counter_text: {
-    fontSize:17,
+    fontSize:14,
   },
   camera_container: {
     flexDirection: 'row',
@@ -365,8 +368,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   camera_button_image: {
-    width: 30,
-    height: 30,
+    width: 24,
+    height: 24,
   },
   take_picture_button_outter: {
     width: 60,
