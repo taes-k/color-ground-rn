@@ -79,7 +79,9 @@ const RewardMain = ({ navigation, route }) =>
                             style={[styles.option_tap_image]}
                         />
                     </View>
+                    <View style={[styles.reaward_counter_text_container]}>
                     <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
+                    </View>
                 </View>
                 <View style={[styles.reward_container]}>
                     <TouchableOpacity style={[FlexStyles.flex_1, styles.reward]} activeOpacity={0.8} onPress={() => showAd()}>
@@ -107,13 +109,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-around',
     },
+    reaward_counter_text_container: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     reaward_counter_text: {
-      fontSize:17,
+      fontSize:14,
     },
 
     option_tap_image: {
-        width: 30,
-        height: 30,
+        width: 24,
+        height: 24,
     },
     reward_container: {
         flexDirection: 'row',
