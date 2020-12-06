@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, Button, Image, ImageBackground, TextInput, Alert, TouchableOpacity, Dimensions } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
 import CameraRoll from "@react-native-community/cameraroll";
 import ViewShot from 'react-native-view-shot';
@@ -7,6 +8,7 @@ import GetPixelColor from 'react-native-get-pixel-color';
 import Share from 'react-native-share';
 import Modal from 'react-native-modal';
 import Geolocation from '@react-native-community/geolocation';
+import * as TutorialStatus from '../../store/actions/TutorialStatus';
 
 import TextModal from './TextModal';
 import FlexStyles from '../../style/FlexStyleSheet';
@@ -15,16 +17,19 @@ import ImagePreprocessor from './function/ImagePreprocessor';
 
 const EditMain = ({ navigation, route }) =>
 {
+  const dispatch = useDispatch();
+
   const { imagePath } = route.params;
   const [imageScale, setImageScale] = useState(1);
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
 
+  const tutorialSuccess = useSelector((state) => state.tutorialStatus.editTutorial);
   const [showToast, setShowToast] = useState(true);
   const [toastMessageText, setToastMessageText] = useState('원을 눌러 원하는 컬러를 직접 선택해보세요.');
 
   const [initialReady, setInitialReady] = useState(false);
 
-  const [initial3Colors, setInitial3Colors] = useState([]);
+  const [initialColors, setInitialColors] = useState([]);
   const [colorChip1, setColorChip1] = useState({});
   const [colorChip2, setColorChip2] = useState({});
   const [colorChip3, setColorChip3] = useState({});
@@ -51,7 +56,7 @@ const EditMain = ({ navigation, route }) =>
   {
     async function initEdit()
     {
-      await InitialColor.getInitial3Colors(imagePath, (x) => { setInitialReady(x) }, (x) => { setInitial3Colors(x) });
+      await InitialColor.getInitialColors(imagePath, (x) => { setInitialReady(x) }, (x) => { setInitialColors(x) });
 
       var [width, height] = await ImagePreprocessor.getImageSize(imagePath);
       var scale = width / Dimensions.get('window').width;
@@ -67,7 +72,7 @@ const EditMain = ({ navigation, route }) =>
     else
     {
       setInitialColorChips();
-      setBackgroundColor(`rgba(${initial3Colors[0].red}, ${initial3Colors[0].green}, ${initial3Colors[0].blue}, 0.5)`);
+      setBackgroundColor(`rgba(${initialColors[0].red}, ${initialColors[0].green}, ${initialColors[0].blue}, 0.5)`);
 
     }
 
@@ -80,9 +85,9 @@ const EditMain = ({ navigation, route }) =>
 
   const setInitialColorChips = () =>
   {
-    setColorChip1(initial3Colors[0]);
-    setColorChip2(initial3Colors[1]);
-    setColorChip3(initial3Colors[2]);
+    setColorChip1(initialColors[0]);
+    setColorChip2(initialColors[1]);
+    setColorChip3(initialColors[2]);
   }
 
   var backgroundColorStyle = {
@@ -110,12 +115,38 @@ const EditMain = ({ navigation, route }) =>
     borderWidth: pickedColorChipNumber == 3 & pickColorChipDisplay ? 2 : 0,
   }
 
+  const shuffleColorChip = () =>
+  {
+
+    var randomInt1 = getRandomInt(0, initialColors.length);
+    var randomInt2 = getRandomInt(0, initialColors.length);
+    while (randomInt1 == randomInt2)
+    {
+      randomInt2 = getRandomInt(0, initialColors.length);
+    }
+    var randomInt3 = getRandomInt(0, initialColors.length);
+    while (randomInt1 == randomInt3 || randomInt2 == randomInt3)
+    {
+      randomInt3 = getRandomInt(0, initialColors.length);
+    }
+
+    setColorChip1(initialColors[randomInt1]);
+    setColorChip2(initialColors[randomInt2]);
+    setColorChip3(initialColors[randomInt3]);
+  }
+
+  const getRandomInt = (min, max) =>
+  {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
+  }
   // ---------------------------------------------------------------------------------------------
   // toast message
   // ---------------------------------------------------------------------------------------------
 
   const toastContainerStyle = {
-    display: showToast ? 'flex' : 'none',
+    display: !tutorialSuccess ? 'flex' : 'none',
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -251,7 +282,8 @@ const EditMain = ({ navigation, route }) =>
     else
     {
       setPickColorChipDisplay(false);
-      setShowToast(false);
+      // setShowToast(false);
+      dispatch(TutorialStatus.setEditTutorialSuccess());
     }
   }
 
@@ -316,7 +348,7 @@ const EditMain = ({ navigation, route }) =>
     setTextModalShow(true);
   }
 
-  const hideTextSettingModal= () =>
+  const hideTextSettingModal = () =>
   {
     setTextModalShow(false);
   }
@@ -457,7 +489,7 @@ const EditMain = ({ navigation, route }) =>
             </View>
             <Text style={[styles.edit_bottom_button_text]}>Text</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8} onPress={() => shuffleColorChip()}>
             <View style={[styles.edit_bottom_button]} >
               <Image
                 source={require('../../images/shuffle.png')}
@@ -480,23 +512,23 @@ const EditMain = ({ navigation, route }) =>
         style={{ justifyContent: 'flex-end', margin: 0 }}
         onSwipeComplete={() => hideTextSettingModal()}
         swipeDirection={['up', 'down']}
-      onBackdropPress={() => hideTextSettingModal()}
+        onBackdropPress={() => hideTextSettingModal()}
       >
         <TouchableOpacity style={{ flex: 3 }} activeOpacity={0} onPress={() => hideTextSettingModal()}>
           {/* for align space */}
         </TouchableOpacity>
         <View style={[styles.modal_container]}>
           <View style={[styles.modal_option_tab]}>
-            <TouchableOpacity style={[FlexStyles.flex_1, styles.edit_bottom_button_container]} onPress={() => hideTextSettingModal()}>
+            {/* <TouchableOpacity style={[FlexStyles.flex_1, styles.modal_option_tab_button_container]} onPress={() => hideTextSettingModal()}>
               <Image
                 source={require('../../images/cancel.png')}
                 style={[styles.edit_button_image]}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <View style={[FlexStyles.flex_4, styles.modal_option_tab_text_container]}>
               <Text style={[styles.modal_option_tab_text]} >Text</Text>
             </View>
-            <View style={[FlexStyles.flex_1]} ></View>
+            {/* <View style={[FlexStyles.flex_1]} ></View> */}
           </View>
           <View style={FlexStyles.flex_1}>
             <View style={[styles.modal_contents_text_input_container]}>
@@ -521,8 +553,8 @@ const EditMain = ({ navigation, route }) =>
                 </TouchableOpacity>
               </View>
               <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextValue('@3XO')}>
-                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>3XO</Text>
+                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextValue('')}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>Clear</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextHHMMSS()}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>hh:mm:ss</Text>
@@ -604,7 +636,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 15,
     top: 15,
-    borderBottomWidth:1,
+    borderBottomWidth: 1,
     borderBottomColor: '#FFFFFF',
     borderStyle: 'solid'
   },
@@ -656,6 +688,7 @@ const styles = StyleSheet.create({
   modal_container: {
     backgroundColor: 'white',
     padding: 10,
+    backgroundColor: '#F5F5F6',
     borderColor: 'rgba(0, 0, 0, 0.1)',
     height: 500,
   },
@@ -665,12 +698,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
   },
+  modal_option_tab_button_container: {
+    justifyContent: 'center',
+    paddingLeft: 10,
+    // alignItems: 'center',
+  },
   modal_option_tab_text_container: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   modal_option_tab_text: {
-    fontSize: 17,
+    fontSize: 14,
   },
   modal_contents_text_input_container: {
     flexDirection: 'row',
@@ -681,7 +719,8 @@ const styles = StyleSheet.create({
   },
   modal_contents_text_input: {
     textAlign: 'center',
-    height: 50,
+    fontSize: 15,
+    height: 40,
     borderBottomColor: '#000000',
     borderStyle: 'solid',
     borderBottomWidth: 1,
@@ -706,8 +745,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modal_text_select_button_text: {
-    fontSize: 15,
-    fontWeight: '300',
+    fontSize: 13,
+    fontWeight: '400',
     maxWidth: 90,
   },
 
@@ -727,7 +766,7 @@ const styles = StyleSheet.create({
   },
   modal_ok_button_text: {
     fontSize: 15,
-    fontWeight: '300',
+    fontWeight: '400',
     color: '#FFFFFF',
   },
 });
