@@ -3,6 +3,8 @@ import { AsyncStorage, StyleSheet, Text, View, Button, TouchableHighlight, Anima
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RNCamera } from 'react-native-camera';
+import CameraRoll from "@react-native-community/cameraroll";
+import { useFocusEffect } from '@react-navigation/native';
 
 import * as ColoringLimitActions from '../../store/actions/ColoringLimit';
 import imagePicker from 'react-native-image-picker'
@@ -38,7 +40,7 @@ const CameraMain = ({ navigation, route }) =>
     }
   }
 
-  const resetFlash= () =>
+  const resetFlash = () =>
   {
     setCameraFlash(RNCamera.Constants.FlashMode.off);
   }
@@ -55,7 +57,7 @@ const CameraMain = ({ navigation, route }) =>
     }
   }
 
-  const resetCameraType= () =>
+  const resetCameraType = () =>
   {
     setCameraType(RNCamera.Constants.Type.front);
   }
@@ -96,7 +98,8 @@ const CameraMain = ({ navigation, route }) =>
     {
       if (timerCount > 0)
       {
-        sleep(1000).then(()=>{
+        sleep(1000).then(() =>
+        {
           if (timerCount > 0)
           {
             setTimerCount(timerCount - 1);
@@ -116,12 +119,14 @@ const CameraMain = ({ navigation, route }) =>
     }
   }, [runTakePhoto, timerCount]);
 
-  const resetTimer = () => {
+  const resetTimer = () =>
+  {
     setRunTakePhoto(false);
     setCameraTimer(cameraTimer);
   }
 
-  const resetZeroTimer = () => {
+  const resetZeroTimer = () =>
+  {
     setRunTakePhoto(false);
     setCameraTimer(0);
   }
@@ -138,9 +143,9 @@ const CameraMain = ({ navigation, route }) =>
     resetTimer();
   }
 
-  const timerCounterStyle = {display: timerCount>0?'flex':'none'}
+  const timerCounterStyle = { display: timerCount > 0 ? 'flex' : 'none' }
 
-  const stopTimerButtonStyle = {display: runTakePhoto?'flex':'none'}
+  const stopTimerButtonStyle = { display: runTakePhoto ? 'flex' : 'none' }
 
 
   // ---------------------------------------------------------------------------------------------
@@ -173,7 +178,7 @@ const CameraMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   const onPressTakePhoto = () =>
   {
-    if(runTakePhoto)
+    if (runTakePhoto)
     {
       stopTakePhoto();
     }
@@ -217,6 +222,30 @@ const CameraMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   // go to album
   // ---------------------------------------------------------------------------------------------
+
+  const [albumImageSource, setAlbumImageSource] = useState(require('../../images/album.png'));
+
+  useFocusEffect(
+    React.useCallback(() =>
+    {
+      getRecentPhoto().then(res =>
+      {
+        var sourceUri = {
+          uri: res.edges[0].node.image.uri,
+        }
+
+        setAlbumImageSource(sourceUri);
+      })
+    }, []));
+
+  const getRecentPhoto = async () =>
+  {
+    return CameraRoll.getPhotos({
+      first: 1,
+      assetType: 'Photos'
+    });
+  }
+  
   const goToAlbum = () =>
   {
 
@@ -273,22 +302,22 @@ const CameraMain = ({ navigation, route }) =>
             captureAudio={false}
             style={[FlexStyles.flex_1, styles.camera]} />
           <View style={[styles.color_chip_box]}>
-            <View style={[styles.color_chip]}/>
-            <View style={[styles.color_chip, styles.color_chip_mid]}/>
-            <View style={[styles.color_chip]}/>
+            <View style={[styles.color_chip]} />
+            <View style={[styles.color_chip, styles.color_chip_mid]} />
+            <View style={[styles.color_chip]} />
           </View>
           <Text style={[timerCounterStyle, styles.timer_counter]}>{timerCount}</Text>
         </View>
         <View style={[FlexStyles.flex_2, styles.camera_bottom]}>
           <TouchableOpacity activeOpacity={0.8} onPress={() => { goToAlbum() }}>
             <Image
-              source={require('../../images/album.png')}
-              style={[styles.camera_button_image]}
+              source={albumImageSource}
+              style={[styles.album_button_image]}
             />
           </TouchableOpacity>
           <TouchableOpacity style={[styles.take_picture_button_outter]} activeOpacity={0.8} onPress={onPressTakePhoto}>
             <View style={[styles.take_picture_button_inner]} >
-            <Image
+              <Image
                 source={require('../../images/cancel_white.png')}
                 style={[stopTimerButtonStyle, styles.camera_button_image]}
               />
@@ -324,7 +353,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   reaward_counter_text: {
-    fontSize:16,
+    fontSize: 16,
   },
   camera_container: {
     flexDirection: 'row',
@@ -360,16 +389,21 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   timer_counter: {
-    color:'#FFFFFF',
-    fontSize: 45, 
+    color: '#FFFFFF',
+    fontSize: 45,
     fontWeight: '300',
-    position:'absolute', 
+    position: 'absolute',
     bottom: 10
   },
   camera_bottom: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
+  },
+  album_button_image: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   camera_button_image: {
     width: 24,
@@ -396,7 +430,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
 
   },
-  stop_take_picture_text:{
+  stop_take_picture_text: {
     fontSize: 25,
     fontWeight: '200',
     color: '#FFFFFF',

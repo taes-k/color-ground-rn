@@ -480,7 +480,7 @@ const EditMain = ({ navigation, route }) =>
           <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
             {/* for align space */}
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8} onPress={() => showTextSettingModal()}>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.5} onPress={() => showTextSettingModal()}>
             <View style={[styles.edit_bottom_button]} >
               <Image
                 source={require('../../images/text.png')}
@@ -489,7 +489,7 @@ const EditMain = ({ navigation, route }) =>
             </View>
             <Text style={[styles.edit_bottom_button_text]}>Text</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8} onPress={() => shuffleColorChip()}>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.5} onPress={() => shuffleColorChip()}>
             <View style={[styles.edit_bottom_button]} >
               <Image
                 source={require('../../images/shuffle.png')}
