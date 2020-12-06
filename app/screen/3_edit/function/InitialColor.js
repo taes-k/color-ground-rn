@@ -7,7 +7,7 @@ import GetPixelColor from 'react-native-get-pixel-color';
 import ImageSize from './ImageSize';
 import PickColor from './PickColor';
 
-const getInitial3Colors = async (imagePath, setInitialReady, setInitialColors) =>
+const getInitialColors = async (imagePath, setInitialReady, setInitialColors) =>
 {
     await GetPixelColor.setImage(imagePath);
     var initialColors = await getInitailColors(imagePath);
@@ -20,8 +20,9 @@ const getInitailColors = async (imagePath) =>
 {
     var [width, height] = await getImageSize(imagePath);
     var colors = await getSampleColors(imagePath, width, height);
-    var initialColors = getBig3SampleColors(colors)
+    var initialColors = getInitialSampleColors(colors)
 
+    console.log("INITCOLORS : ", initialColors);
     return initialColors;
 }
 
@@ -40,7 +41,7 @@ const getSampleColors = async (imagePath, width, height) =>
     var pickCount = 0;
     var widthTerm = Math.floor(width / pickSize);
     var heightTerm = Math.floor(height / pickSize);
-    var scale = width/Dimensions.get('window').width;
+    var scale = width / Dimensions.get('window').width;
 
     for (x = 1; x <= pickSize; x++)
     {
@@ -59,7 +60,7 @@ const getSampleColors = async (imagePath, width, height) =>
 
                     var hsb = getHSBFromRGB(red, green, blue);
 
-                    var colorObj = { coordX: Math.round(coordX/scale), coordY: Math.round(coordY/scale), hexColor: color, red: red, green: green, blue: blue, hue: hsb.hue, saturation: hsb.saturation, brightness: hsb.brightness };
+                    var colorObj = { coordX: Math.round(coordX / scale), coordY: Math.round(coordY / scale), hexColor: color, red: red, green: green, blue: blue, hue: hsb.hue, saturation: hsb.saturation, brightness: hsb.brightness };
 
                     colors.push(colorObj);
                 });
@@ -68,7 +69,7 @@ const getSampleColors = async (imagePath, width, height) =>
     return colors;
 }
 
-const getBig3SampleColors = (colors) =>
+const getInitialSampleColors = (colors) =>
 {
     var tempPickColors = [];
 
@@ -102,8 +103,12 @@ const getBig3SampleColors = (colors) =>
 
     var loopCount = 1
 
-    while (tempPickColors.length < 3)
+    while (tempPickColors.length < 3 || loopCount <= maxLoopCountStandard)
     {
+        if (tempPickColors.length > 10)
+        {
+            break;
+        }
         if (loopCount > maxLoopCountStandard)
         {
             hueStandard = 0
@@ -225,4 +230,4 @@ const getHSBFromRGB = (red, green, blue) =>
     return hsb;
 }
 
-export default { getInitial3Colors };
+export default { getInitialColors };

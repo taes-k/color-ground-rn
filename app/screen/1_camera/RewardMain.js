@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     reaward_counter_text: {
-      fontSize:14,
+      fontSize:16,
     },
 
     option_tap_image: {

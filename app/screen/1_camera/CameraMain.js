@@ -288,7 +288,11 @@ const CameraMain = ({ navigation, route }) =>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.take_picture_button_outter]} activeOpacity={0.8} onPress={onPressTakePhoto}>
             <View style={[styles.take_picture_button_inner]} >
-              <Text style={[stopTimerButtonStyle, styles.stop_take_picture_text]}>X</Text>
+            <Image
+                source={require('../../images/cancel_white.png')}
+                style={[stopTimerButtonStyle, styles.camera_button_image]}
+              />
+              {/* <Text style={[stopTimerButtonStyle, styles.stop_take_picture_text]}>X</Text> */}
             </View>
           </TouchableOpacity>
 
@@ -320,7 +324,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   reaward_counter_text: {
-    fontSize:14,
+    fontSize:16,
   },
   camera_container: {
     flexDirection: 'row',
