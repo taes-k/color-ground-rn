@@ -39,7 +39,7 @@ export default (state = initialState, action) =>
         case actions.ERROR_ADD_COUNT:
             if(state.count < 5)
             {
-                state.count = state.count + action.count;
+                state.count = 5;
                 setColoringLimitCountToLocalStorage(state.count);
             }
         default:

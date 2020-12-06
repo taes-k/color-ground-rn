@@ -22,7 +22,6 @@ const getInitailColors = async (imagePath) =>
     var colors = await getSampleColors(imagePath, width, height);
     var initialColors = getInitialSampleColors(colors)
 
-    console.log("INITCOLORS : ", initialColors);
     return initialColors;
 }
 
