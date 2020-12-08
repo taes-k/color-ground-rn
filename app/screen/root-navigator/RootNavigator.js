@@ -8,6 +8,7 @@ import Splash from '../splash/Splash';
 import CameraMain from '../1_camera/CameraMain';
 import AppMainStack from './AppMainStack';
 import * as ColoringLimitActions from '../../store/actions/ColoringLimit';
+import * as TutorialStatusActions from '../../store/actions/TutorialStatus';
 
 const RootStack = createStackNavigator();
 
@@ -17,13 +18,16 @@ function RootNavigator()
     const dispatch = useDispatch();
 
     const isReady = useSelector((state) => state.appReady.isReady);
-    // const coloringLimitCount = 
 
     useEffect(() =>
     {
         console.log("count setting");
         getColoringLimitCount()
             .then(res => dispatch(ColoringLimitActions.setCount(res)));
+
+        console.log("tutorial setting");
+        getTutorialStatus()
+            .then(res => dispatch(TutorialStatusActions.setTutorialStatus(res)))
     }, []);
 
     getColoringLimitCount = async () =>
@@ -47,9 +51,37 @@ function RootNavigator()
         }
         catch (err)
         {
+            count = STANDARD_COUNT;
             console.log(err);
         }
         return count;
+    }
+
+    getTutorialStatus = async () =>
+    {
+        var status = false;
+        try
+        {
+            status = await AsyncStorage.getItem(String(TutorialStatusActions.TUTORIAL_SUCCESS_STATUS));
+
+            if (status === 'true')
+            {
+                // local string to integer
+                status = true;
+                console.log("get local status data : ", status);
+            }
+            else
+            {
+                status = false;
+                console.log("there's no local status");
+            }
+        }
+        catch (err)
+        {
+            status = false;
+            console.log(err);
+        }
+        return status;
     }
 
     return (

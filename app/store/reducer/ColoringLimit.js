@@ -6,8 +6,6 @@ const setColoringLimitCountToLocalStorage = async (cnt) =>
     try
     {
         await AsyncStorage.setItem(String(actions.COLORING_LIMIT_COUNT), String(cnt));
-        var getCount = await AsyncStorage.getItem(String(actions.COLORING_LIMIT_COUNT));
-        console.log("LOCAL COUNT ::: ", getCount)
     } catch (e)
     {
         console.log("set ColoringLimitCount local storage error");

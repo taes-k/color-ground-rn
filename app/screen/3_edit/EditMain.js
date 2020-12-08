@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { StyleSheet, Text, View, Button, Image, ImageBackground, TextInput, Alert, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, View, Button, Image, ImageBackground, Animated, TextInput, Alert, TouchableOpacity, Dimensions } from 'react-native';
+import Text from '../../components/CustomText';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
 import CameraRoll from "@react-native-community/cameraroll";
@@ -24,8 +25,8 @@ const EditMain = ({ navigation, route }) =>
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
 
   const tutorialSuccess = useSelector((state) => state.tutorialStatus.editTutorial);
-  const [showToast, setShowToast] = useState(true);
   const [toastMessageText, setToastMessageText] = useState('원을 눌러 원하는 컬러를 직접 선택해보세요.');
+  const [toastBlink, setToastBlink] = useState(false);
 
   const [initialReady, setInitialReady] = useState(false);
 
@@ -145,8 +146,44 @@ const EditMain = ({ navigation, route }) =>
   // toast message
   // ---------------------------------------------------------------------------------------------
 
-  const toastContainerStyle = {
-    display: !tutorialSuccess ? 'flex' : 'none',
+  const [toastOpacityAnimatedValue, setToastOpacityAnimatedValue] = useState(new Animated.Value(0));
+
+  useEffect(()=>{    
+    setToastOpacityAnimatedValue(tutorialSuccess?new Animated.Value(0):new Animated.Value(1));
+  },[tutorialSuccess])
+
+  useEffect(()=>{
+    if(toastBlink == true)
+    {
+      fadeInToast();
+      setTimeout(() => {
+        fadeOutToast();
+      }, 1500);
+
+      setToastBlink(false);
+    }
+  },[toastBlink])
+
+  const fadeInToast = () =>
+  {
+    Animated.timing(toastOpacityAnimatedValue, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }
+
+  const fadeOutToast = async () =>
+  {
+    Animated.timing(toastOpacityAnimatedValue, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }
+
+  const toastFadeOpacityStyle = {
+    opacity: toastOpacityAnimatedValue
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -170,9 +207,10 @@ const EditMain = ({ navigation, route }) =>
   const saveImage = async (imgUri) =>
   {
     config = { type: 'photo', album: 'colorground' }
-    // CameraRoll.save(imgUri, config);
     const result = await CameraRoll.save(imgUri);
-    Alert.alert("사진이 갤러리에 저장되었습니다.");
+    setToastMessageText("저장이 완료되었습니다.")
+
+    setToastBlink(true);
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -185,8 +223,6 @@ const EditMain = ({ navigation, route }) =>
     {
       openShare(res);
     })
-
-
   }
 
   const openShare = async (imgUri) =>
@@ -282,8 +318,11 @@ const EditMain = ({ navigation, route }) =>
     else
     {
       setPickColorChipDisplay(false);
-      // setShowToast(false);
-      dispatch(TutorialStatus.setEditTutorialSuccess());
+      if(!tutorialSuccess)
+      {
+        fadeOutToast();
+        dispatch(TutorialStatus.setEditTutorialSuccess());
+      }
     }
   }
 
@@ -356,11 +395,12 @@ const EditMain = ({ navigation, route }) =>
   const getNearByPlace = (coords) =>
   {
     const googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+    const languageParam = "language=en"
     const locationParam = "location="
     const radiusParam = "radius=1000";
     const keyParam = "key=" + GOOGLE_MAP_API_KEY;
 
-    const callUrl = googlePlaceUrl + '?' + locationParam + coords + "&" + radiusParam + "&" + keyParam;
+    const callUrl = googlePlaceUrl + '?' + languageParam + "&" + locationParam + coords + "&" + radiusParam + "&" + keyParam;
 
     return fetch(callUrl)
       .then((response) => response.json())
@@ -422,19 +462,19 @@ const EditMain = ({ navigation, route }) =>
     <SafeAreaView style={[FlexStyles.flex_1, backgroundColorStyle]} >
       <View style={[FlexStyles.flex_1]} >
         <View style={[styles.option_tap]}>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={[styles.button_container]} activeOpacity={1} onPress={() => navigation.goBack()}>
             <Image
               source={require('../../images/cancel.png')}
               style={[styles.edit_button_image]}
             />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => onCapture()}>
+          <TouchableOpacity style={[styles.button_container]} activeOpacity={1} onPress={() => onCapture()}>
             <Image
               source={require('../../images/download.png')}
               style={[styles.edit_button_image]}
             />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => shareImage()}>
+          <TouchableOpacity style={[styles.button_container]} activeOpacity={1} onPress={() => shareImage()}>
             <Image
               source={require('../../images/share.png')}
               style={[styles.edit_button_image]}
@@ -474,13 +514,15 @@ const EditMain = ({ navigation, route }) =>
           </ImageBackground>
         </ViewShot>
         <View style={[FlexStyles.flex_1, styles.edit_bottom]}>
-          <View style={[toastContainerStyle, styles.toast_container]}>
+
+          <Animated.View style={[toastFadeOpacityStyle, styles.toast_container]}>
             <Text style={[styles.toast_text]}>{toastMessageText}</Text>
-          </View>
+          </Animated.View>
+
           <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
             {/* for align space */}
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.5} onPress={() => showTextSettingModal()}>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={1} onPress={() => showTextSettingModal()}>
             <View style={[styles.edit_bottom_button]} >
               <Image
                 source={require('../../images/text.png')}
@@ -489,7 +531,7 @@ const EditMain = ({ navigation, route }) =>
             </View>
             <Text style={[styles.edit_bottom_button_text]}>Text</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.5} onPress={() => shuffleColorChip()}>
+          <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={1} onPress={() => shuffleColorChip()}>
             <View style={[styles.edit_bottom_button]} >
               <Image
                 source={require('../../images/shuffle.png')}
@@ -519,16 +561,9 @@ const EditMain = ({ navigation, route }) =>
         </TouchableOpacity>
         <View style={[styles.modal_container]}>
           <View style={[styles.modal_option_tab]}>
-            {/* <TouchableOpacity style={[FlexStyles.flex_1, styles.modal_option_tab_button_container]} onPress={() => hideTextSettingModal()}>
-              <Image
-                source={require('../../images/cancel.png')}
-                style={[styles.edit_button_image]}
-              />
-            </TouchableOpacity> */}
             <View style={[FlexStyles.flex_4, styles.modal_option_tab_text_container]}>
               <Text style={[styles.modal_option_tab_text]} >Text</Text>
             </View>
-            {/* <View style={[FlexStyles.flex_1]} ></View> */}
           </View>
           <View style={FlexStyles.flex_1}>
             <View style={[styles.modal_contents_text_input_container]}>
@@ -553,14 +588,14 @@ const EditMain = ({ navigation, route }) =>
                 </TouchableOpacity>
               </View>
               <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextValue('')}>
-                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>Clear</Text>
-                </TouchableOpacity>
                 <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextHHMMSS()}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>hh:mm:ss</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextYYYYMMDD()}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>yyyy.mm.dd</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextValue('')}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>Clear</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -583,6 +618,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
+  },
+  button_container: {
+    padding:5,
   },
   edit_button_image: {
     width: 24,
@@ -636,15 +674,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 15,
     top: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#FFFFFF',
-    borderStyle: 'solid'
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#FFFFFF',
+    // borderStyle: 'solid'
   },
   text_tag_text: {
-    color: '#FFFFFF',
+    color: 'rgba(255,255,255,0.9)',
     fontSize: 12,
     lineHeight: 13,
-
+    fontFamily: 'Roboto'
   },
   edit_bottom: {
     position: 'relative',
@@ -664,9 +702,8 @@ const styles = StyleSheet.create({
 
   },
   toast_text: {
-    fontSize: 15,
+    fontSize: 12,
     color: '#FFFFFF'
-
   },
   edit_bottom_button_container: {
     alignItems: 'center',
@@ -681,8 +718,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   edit_bottom_button_text: {
+    fontFamily: 'Roboto',
     marginTop: 15,
-    fontSize: 13,
+    fontSize: 12,
   },
 
   modal_container: {

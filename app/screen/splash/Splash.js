@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import { useDispatch, useCallback } from 'react-redux';
 import * as AppReadyActions from '../../store/actions/AppReady';
 
@@ -15,9 +15,7 @@ function Splash() {
 
   return (
     <View style={styles.view}>
-      <Text style={styles.text}>
-        Splash Screen
-      </Text>
+      <Image source={require('../../images/app_icon.png')} style={[styles.image]}/>
     </View>
   );
 }
@@ -25,20 +23,13 @@ function Splash() {
 const styles = StyleSheet.create({
   view: {
     flex: 1,
-    padding: 24,
-    backgroundColor: "#eaeaea"
+    backgroundColor: "#000000",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  text: {
-    marginTop: 16,
-    paddingVertical: 8,
-    borderWidth: 4,
-    borderColor: "#20232a",
-    borderRadius: 6,
-    backgroundColor: "#61dafb",
-    color: "#20232a",
-    textAlign: "center",
-    fontSize: 30,
-    fontWeight: "bold"
+  image: {
+    width:90,
+    height:90,
   }
 });
 

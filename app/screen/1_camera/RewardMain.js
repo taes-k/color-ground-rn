@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import Text from '../../components/CustomText';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { RewardedAd, RewardedAdEventType, AdEventType, TestIds } from '@react-native-firebase/admob';
@@ -64,10 +65,10 @@ const RewardMain = ({ navigation, route }) =>
 
     return (
 
-        <SafeAreaView style={[FlexStyles.flex_1, styles.background_style]} >
+        <SafeAreaView style={[FlexStyles.flex_1, styles.background_style]}>
             <View style={[FlexStyles.flex_1]}>
                 <View style={[styles.option_tap]}>
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+                    <TouchableOpacity style={[styles.button_container]} activeOpacity={0.8} onPress={() => navigation.goBack()}>
                         <Image
                             source={require('../../images/cancel.png')}
                             style={[styles.option_tap_image]}
@@ -80,7 +81,7 @@ const RewardMain = ({ navigation, route }) =>
                         />
                     </View>
                     <View style={[styles.reaward_counter_text_container]}>
-                    <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
+                        <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
                     </View>
                 </View>
                 <View style={[styles.reward_container]}>
@@ -109,12 +110,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-around',
     },
+    button_container: {
+      padding:5,
+    },
     reaward_counter_text_container: {
       alignItems: 'center',
       justifyContent: 'center',
     },
     reaward_counter_text: {
       fontSize:16,
+      width:24,
+      height:24,
     },
 
     option_tap_image: {
