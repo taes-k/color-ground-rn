@@ -32,7 +32,7 @@ const RewardMain = ({ navigation, route }) =>
 
     const eventListener = rewarded.onAdEvent((type, error, reward) =>
     {
-        if(type != AdEventType.ERROR)
+        if (type != AdEventType.ERROR)
         {
             if (type === RewardedAdEventType.LOADED)
             {
@@ -80,7 +80,7 @@ const RewardMain = ({ navigation, route }) =>
                             style={[styles.option_tap_image]}
                         />
                     </View>
-                    <View style={[styles.reaward_counter_text_container]}>
+                    <View style={[styles.button_container, styles.reaward_counter_text_container]}>
                         <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
                     </View>
                 </View>
@@ -111,16 +111,19 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
     },
     button_container: {
-      padding:5,
+        padding: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     reaward_counter_text_container: {
-      alignItems: 'center',
-      justifyContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     reaward_counter_text: {
-      fontSize:16,
-      width:24,
-      height:24,
+        textAlign: 'center',
+        fontSize: 16,
+        width: 24,
+        height: 24,
     },
 
     option_tap_image: {
