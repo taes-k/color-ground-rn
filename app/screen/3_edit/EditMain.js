@@ -158,7 +158,7 @@ const EditMain = ({ navigation, route }) =>
       fadeInToast();
       setTimeout(() => {
         fadeOutToast();
-      }, 1500);
+      }, 1000);
 
       setToastBlink(false);
     }
@@ -168,7 +168,7 @@ const EditMain = ({ navigation, route }) =>
   {
     Animated.timing(toastOpacityAnimatedValue, {
       toValue: 1,
-      duration: 500,
+      duration: 200,
       useNativeDriver: true,
     }).start();
   }
@@ -177,7 +177,7 @@ const EditMain = ({ navigation, route }) =>
   {
     Animated.timing(toastOpacityAnimatedValue, {
       toValue: 0,
-      duration: 500,
+      duration: 200,
       useNativeDriver: true,
     }).start();
   }
@@ -538,7 +538,7 @@ const EditMain = ({ navigation, route }) =>
                 style={[styles.edit_button_image]}
               />
             </View>
-            <Text style={[styles.edit_bottom_button_text]}>shuffle</Text>
+            <Text style={[styles.edit_bottom_button_text]}>Shuffle</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.edit_bottom_button_container]} activeOpacity={0.8}>
             {/* for align space */}
@@ -621,6 +621,8 @@ const styles = StyleSheet.create({
   },
   button_container: {
     padding:5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   edit_button_image: {
     width: 24,

@@ -298,7 +298,7 @@ const CameraMain = ({ navigation, route }) =>
             />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button_container]} style={[styles.reaward_counter_text_container]} activeOpacity={1} onPress={() => { goToRewardAd() }}>
+          <TouchableOpacity style={[styles.button_container, styles.reaward_counter_text_container]} activeOpacity={1} onPress={() => { goToRewardAd() }}>
             <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
           </TouchableOpacity>
         </View>
@@ -358,6 +358,8 @@ const styles = StyleSheet.create({
   },
   button_container: {
     padding:5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   reaward_counter_text_container: {
     alignItems: 'center',
@@ -367,6 +369,7 @@ const styles = StyleSheet.create({
     width:24,
     height:24,
     fontSize: 16,
+    textAlign: 'center',
   },
   camera_container: {
     flexDirection: 'row',
