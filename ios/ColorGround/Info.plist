@@ -49,8 +49,10 @@
 	<string>사진 라이브러리를 사용합니다</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Fonts/NotoSansKR-Bold.otf</string>
-		<string>Fonts/NotoSansKR-Regular.otf</string>
+		<string>Fonts/Roboto-Bold.ttf</string>
+		<string>Fonts/Roboto-Regular.ttf</string>
+		<string>Fonts/Spoqa Han Sans Neo Bold.otf</string>
+		<string>Fonts/Spoqa Han Sans Neo Regular.otf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

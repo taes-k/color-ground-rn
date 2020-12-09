@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { AsyncStorage, StyleSheet, Text, View, Button, TouchableHighlight, Animated, Alert, TouchableOpacity, Image } from 'react-native';
+import { AsyncStorage, StyleSheet, View, Button, TouchableHighlight, Animated, Alert, TouchableOpacity, Image } from 'react-native';
+import Text from '../../components/CustomText';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RNCamera } from 'react-native-camera';
@@ -18,7 +19,7 @@ const CameraMain = ({ navigation, route }) =>
   const [cameraType, setCameraType] = useState(RNCamera.Constants.Type.back);
   const [cameraTimer, setCameraTimer] = useState(0);
   const [timerCount, setTimerCount] = useState(0);
-  const [runTakePhoto, setRunTakePhoto] = useState(false);
+  const [runTakePhotoTimer, setRunTakePhotoTimer] = useState(false);
 
   // ---------------------------------------------------------------------------------------------
   // camera function
@@ -94,7 +95,7 @@ const CameraMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   useEffect(() =>
   {
-    if (runTakePhoto)
+    if (runTakePhotoTimer)
     {
       if (timerCount > 0)
       {
@@ -117,25 +118,25 @@ const CameraMain = ({ navigation, route }) =>
     {
       setTimerCount(cameraTimer);
     }
-  }, [runTakePhoto, timerCount]);
+  }, [runTakePhotoTimer, timerCount]);
 
   const resetTimer = () =>
   {
-    setRunTakePhoto(false);
+    setRunTakePhotoTimer(false);
     setCameraTimer(cameraTimer);
   }
 
   const resetZeroTimer = () =>
   {
-    setRunTakePhoto(false);
+    setRunTakePhotoTimer(false);
     setCameraTimer(0);
   }
 
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-  const startTakePhoto = async () => 
+  const startTakePhotoTimer = async () => 
   {
-    setRunTakePhoto(true);
+    setRunTakePhotoTimer(true);
   }
 
   const stopTakePhoto = () =>
@@ -145,7 +146,7 @@ const CameraMain = ({ navigation, route }) =>
 
   const timerCounterStyle = { display: timerCount > 0 ? 'flex' : 'none' }
 
-  const stopTimerButtonStyle = { display: runTakePhoto ? 'flex' : 'none' }
+  const stopTimerButtonStyle = { display: runTakePhotoTimer ? 'flex' : 'none' }
 
 
   // ---------------------------------------------------------------------------------------------
@@ -178,7 +179,7 @@ const CameraMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   const onPressTakePhoto = () =>
   {
-    if (runTakePhoto)
+    if (runTakePhotoTimer)
     {
       stopTakePhoto();
     }
@@ -192,7 +193,14 @@ const CameraMain = ({ navigation, route }) =>
   {
     if (checkColoringLimitCount())
     {
-      startTakePhoto();
+      if(cameraTimer == 0)
+      {
+        takePhoto();
+      }
+      else
+      {
+        startTakePhotoTimer();
+      }
     }
     else
     {
@@ -277,20 +285,20 @@ const CameraMain = ({ navigation, route }) =>
     <SafeAreaView style={[FlexStyles.flex_1, styles.background_style]} >
       <View style={[FlexStyles.flex_1]}>
         <View style={[styles.option_tap]}>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => { changeFlashOnOff() }}>
+          <TouchableOpacity style={[styles.button_container]} activeOpacity={1} onPress={() => { changeFlashOnOff() }}>
             <Image
               source={flashImage}
               style={[styles.camera_button_image]}
             />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => { changCameraTimer() }}>
+          <TouchableOpacity style={[styles.button_container]} activeOpacity={1} onPress={() => { changCameraTimer() }}>
             <Image
               source={timerImage}
               style={[styles.camera_button_image]}
             />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.reaward_counter_text_container]} activeOpacity={0.8} onPress={() => { goToRewardAd() }}>
+          <TouchableOpacity style={[styles.button_container]} style={[styles.reaward_counter_text_container]} activeOpacity={1} onPress={() => { goToRewardAd() }}>
             <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
           </TouchableOpacity>
         </View>
@@ -309,13 +317,13 @@ const CameraMain = ({ navigation, route }) =>
           <Text style={[timerCounterStyle, styles.timer_counter]}>{timerCount}</Text>
         </View>
         <View style={[FlexStyles.flex_2, styles.camera_bottom]}>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => { goToAlbum() }}>
+          <TouchableOpacity activeOpacity={1} onPress={() => { goToAlbum() }}>
             <Image
               source={albumImageSource}
               style={[styles.album_button_image]}
             />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.take_picture_button_outter]} activeOpacity={0.8} onPress={onPressTakePhoto}>
+          <TouchableOpacity style={[styles.take_picture_button_outter]} activeOpacity={1} onPress={onPressTakePhoto}>
             <View style={[styles.take_picture_button_inner]} >
               <Image
                 source={require('../../images/cancel_white.png')}
@@ -325,10 +333,10 @@ const CameraMain = ({ navigation, route }) =>
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.8} onPress={() => { changCameraType() }}>
+          <TouchableOpacity activeOpacity={1} onPress={() => { changCameraType() }}>
             <Image
               source={require('../../images/rotate.png')}
-              style={[styles.camera_button_image]}
+              style={[styles.camera_rotate_image]}
             />
           </TouchableOpacity>
         </View>
@@ -348,11 +356,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
   },
+  button_container: {
+    padding:5,
+  },
   reaward_counter_text_container: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   reaward_counter_text: {
+    width:24,
+    height:24,
     fontSize: 16,
   },
   camera_container: {
@@ -408,6 +421,10 @@ const styles = StyleSheet.create({
   camera_button_image: {
     width: 24,
     height: 24,
+  },
+  camera_rotate_image: {
+    width: 32,
+    height: 32,
   },
   take_picture_button_outter: {
     width: 60,
