@@ -43,9 +43,9 @@ const getSampleColors = async (imagePath, width, height) =>
     var heightTerm = Math.floor(height / pickSize);
     var scale = width / Dimensions.get('window').width;
 
-    for (x = 1; x <= pickSize; x++)
+    for (x = 1; x < pickSize; x++)
     {
-        for (y = 1; y <= pickSize; y++)
+        for (y = 1; y < pickSize; y++)
         {
             let coordX = widthTerm * x;
             let coordY = heightTerm * y;
