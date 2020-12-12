@@ -219,6 +219,10 @@ const CameraMain = ({ navigation, route }) =>
       {
         setToastBlink(true);
       }
+      else
+      {
+        setToastOpacityAnimatedValue(new Animated.Value(0));
+      }
 
       return () => setToastBlink(false);
     }, [rewardCountWarning])
