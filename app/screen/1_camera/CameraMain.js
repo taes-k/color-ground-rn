@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AsyncStorage, StyleSheet, View, Button, TouchableHighlight, Animated, Alert, TouchableOpacity, Image } from 'react-native';
+import { AsyncStorage, StyleSheet, View, Button, TouchableHighlight, Animated, Alert, TouchableOpacity, Image, } from 'react-native';
 import Text from '../../components/CustomText';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -152,9 +152,38 @@ const CameraMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   // coloring limit
   // ---------------------------------------------------------------------------------------------
+  const COUNT_WARNING_MESSAGE = "광고시청후 사용가능 횟수를 충전 할 수 있습니다";
+  const COUNT_ZERO_MESSAGE = "광고시청후 사용가능 횟수를 충전 할 수 있습니다";
+
   const dispatch = useDispatch();
   const coloringLimitCount = useSelector((state) => state.coloringLimit.count);
+  const [rewardCountWarning, setRewardCountWarning] = useState(false);
 
+  useEffect(() =>
+  {
+    rewardWarningCheck();
+  }, [coloringLimitCount])
+
+  const rewardWarningCheck = () =>
+  {
+    if (coloringLimitCount < 4)
+    {
+      if(coloringLimitCount == 0)
+      {
+        setToastMessageText(COUNT_ZERO_MESSAGE);
+      }
+      else
+      {
+        setToastMessageText(COUNT_WARNING_MESSAGE);
+      }
+  
+      setRewardCountWarning(true);
+    }
+    else 
+    { 
+      setRewardCountWarning(false);
+    }
+  }
   const goToRewardAd = () =>
   {
     navigation.navigate('RewardMain', {});
@@ -172,6 +201,63 @@ const CameraMain = ({ navigation, route }) =>
   const useColoringLimitCount = () =>
   {
     dispatch(ColoringLimitActions.useCount());
+  }
+
+  const rewardCountWarningStyle = { color: rewardCountWarning ? '#FF4343' : '#000000' };
+
+  // ---------------------------------------------------------------------------------------------
+  // toast
+  // ---------------------------------------------------------------------------------------------
+  const [toastMessageText, setToastMessageText] = useState(COUNT_WARNING_MESSAGE);
+  const [toastBlink, setToastBlink] = useState(false);
+  const [toastOpacityAnimatedValue, setToastOpacityAnimatedValue] = useState(new Animated.Value(0));
+
+  useFocusEffect(
+    React.useCallback(() =>
+    {
+      if(rewardCountWarning)
+      {
+        setToastBlink(true);
+      }
+
+      return () => setToastBlink(false);
+    }, [rewardCountWarning])
+  );
+
+  useEffect(()=>{
+    var timeout;
+
+    if(toastBlink == true)
+    {
+      fadeInToast();
+      timeout = setTimeout(() => {
+        fadeOutToast();
+      }, 2000);
+    }
+
+    return () => clearTimeout(timeout);
+  },[toastBlink])
+
+  const fadeInToast = () =>
+  {
+    Animated.timing(toastOpacityAnimatedValue, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }
+
+  const fadeOutToast = async () =>
+  {
+    Animated.timing(toastOpacityAnimatedValue, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }
+
+  const toastFadeOpacityStyle = {
+    opacity: toastOpacityAnimatedValue
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -193,7 +279,7 @@ const CameraMain = ({ navigation, route }) =>
   {
     if (checkColoringLimitCount())
     {
-      if(cameraTimer == 0)
+      if (cameraTimer == 0)
       {
         takePhoto();
       }
@@ -253,7 +339,7 @@ const CameraMain = ({ navigation, route }) =>
       assetType: 'Photos'
     });
   }
-  
+
   const goToAlbum = () =>
   {
 
@@ -281,6 +367,7 @@ const CameraMain = ({ navigation, route }) =>
     }
   };
 
+
   return (
     <SafeAreaView style={[FlexStyles.flex_1, styles.background_style]} >
       <View style={[FlexStyles.flex_1]}>
@@ -298,8 +385,8 @@ const CameraMain = ({ navigation, route }) =>
             />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button_container, styles.reaward_counter_text_container]} activeOpacity={1} onPress={() => { goToRewardAd() }}>
-            <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
+          <TouchableOpacity style={[styles.button_container, styles.reward_counter_text_container]} activeOpacity={1} onPress={() => { goToRewardAd() }}>
+            <Text style={[rewardCountWarningStyle, styles.reward_counter_text]}>{coloringLimitCount}</Text>
           </TouchableOpacity>
         </View>
         <View style={[styles.camera_container]}>
@@ -317,6 +404,10 @@ const CameraMain = ({ navigation, route }) =>
           <Text style={[timerCounterStyle, styles.timer_counter]}>{timerCount}</Text>
         </View>
         <View style={[FlexStyles.flex_2, styles.camera_bottom]}>
+          <Animated.View style={[toastFadeOpacityStyle, styles.toast_container]}>
+            <Text style={[styles.toast_text]}>{toastMessageText}</Text>
+          </Animated.View>
+
           <TouchableOpacity activeOpacity={1} onPress={() => { goToAlbum() }}>
             <Image
               source={albumImageSource}
@@ -357,19 +448,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   button_container: {
-    padding:5,
+    padding: 5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   reaward_counter_text_container: {
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
   },
   reaward_counter_text: {
-    width:24,
-    height:24,
+    width: 24,
+    height: 24,
+    lineHeight: 24,
     fontSize: 16,
     textAlign: 'center',
+  },
+  reward_tooltip_text: {
+    color: '#FFFFFF',
+    fontSize: 12,
   },
   camera_container: {
     flexDirection: 'row',
@@ -415,6 +512,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
+  },
+
+  toast_container: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 40,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+  },
+
+  toast_text: {
+    fontSize: 12,
+    color: '#FFFFFF'
   },
   album_button_image: {
     width: 32,

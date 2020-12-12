@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import Text from '../../components/CustomText';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,11 +17,12 @@ const RewardMain = ({ navigation, route }) =>
     // google admob reward advertise
     // ---------------------------------------------------------------------------------------------
 
+    const [adLoading, setAdLoading] = useState(false);
     const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-3940256099942544/1712485313';
 
     const rewarded = RewardedAd.createForAdRequest(adUnitId, {
         requestNonPersonalizedAdsOnly: true,
-        keywords: ['fashion', 'clothing'],
+        // keywords: ['fashion', 'clothing'],
     });
 
     useEffect(() =>
@@ -38,12 +39,13 @@ const RewardMain = ({ navigation, route }) =>
             {
                 // ready to show ad
                 rewarded.show();
+                setAdLoading(false);
             }
 
             if (type === RewardedAdEventType.EARNED_REWARD)
             {
                 // get reward
-                dispatch(ColoringLimitActions.addCount(3));
+                dispatch(ColoringLimitActions.addCount(5));
             }
 
             if (type === AdEventType.CLOSED)
@@ -53,46 +55,65 @@ const RewardMain = ({ navigation, route }) =>
         }
         else
         {
-            alert("광고 서비스 오류로 인해 정상수행되지 않습니다. 에너지는 바로 채울게요!");
-            dispatch(ColoringLimitActions.addErrorCount(3));
+            alert("광고 서비스 오류로 인해 정상수행되지 않습니다. 사용횟수는 5회까지 추가 해 드릴게요!");
+            dispatch(ColoringLimitActions.addErrorCount(5));
         }
     });
 
     const showAd = () =>
     {
-        rewarded.load();
+        if (adLoading != true)
+        {
+            setAdLoading(true);
+            rewarded.load();
+        }
     }
+
+    const adLoadingButtonStyle = { disabled: adLoading, backgroundColor: !adLoading ? '#000000' : '#afafaf' };
+    const adLoadingTextStyle = { display: adLoading ? 'none' : 'flex' };
+    const adLoadingIndicatorStyle = { display: !adLoading ? 'none' : 'flex' };
 
     return (
 
         <SafeAreaView style={[FlexStyles.flex_1, styles.background_style]}>
             <View style={[FlexStyles.flex_1]}>
                 <View style={[styles.option_tap]}>
-                    <TouchableOpacity style={[styles.button_container]} activeOpacity={0.8} onPress={() => navigation.goBack()}>
-                        <Image
-                            source={require('../../images/cancel.png')}
-                            style={[styles.option_tap_image]}
-                        />
-                    </TouchableOpacity>
-                    <View>
-                        <Image
-                            source={require('../../images/white_square.png')}
-                            style={[styles.option_tap_image]}
-                        />
+                    <View style={[FlexStyles.flex_3, styles.button_back_container]}>
+                        <TouchableOpacity style={[styles.button_container, styles.button_back]} activeOpacity={0.8} onPress={() => navigation.goBack()}>
+                            <Image
+                                source={require('../../images/cancel.png')}
+                                style={[styles.option_tap_image]}
+                            />
+                        </TouchableOpacity>
                     </View>
-                    <View style={[styles.button_container, styles.reaward_counter_text_container]}>
-                        <Text style={[styles.reaward_counter_text]}>{coloringLimitCount}</Text>
+                    <View style={[FlexStyles.flex_3, styles.button_container, styles.reaward_counter_text_container]}>
+                        <Text style={[styles.reaward_counter_text]}>현재 {coloringLimitCount}회 남음</Text>
                     </View>
                 </View>
-                <View style={[styles.reward_container]}>
-                    <TouchableOpacity style={[FlexStyles.flex_1, styles.reward]} activeOpacity={0.8} onPress={() => showAd()}>
-                        <View style={{ width: 84, height: 84, borderTopColor: 'rgba(0,0,0,0)', borderRightColor: 'rgba(0,0,0,1)', borderBottomColor: 'rgba(0,0,0,0)', borderLeftColor: '#aaaaaa', borderStyle: 'solid', borderTopWidth: 43, borderRightwidth: 0, borderBottomWidth: 43, borderLeftWidth: 84 }}>
-                            <Text>Aa</Text>
-                        </View>
-                    </TouchableOpacity>
+                <View style={[FlexStyles.flex_column_4, styles.reward_text_container]}>
+                    <Text style={[styles.reward_text_title]}>
+                        3XO - Colorground
+                    </Text>
+                    <Text style={[styles.reward_text]}>
+                        내가 기억하는 곳, 내가 기억하는 시간{"\n"}
+                        나를 둘러싸고 있는 지금{"\n"}
+                        나중에 여행을 떠나게 될 때{"\n"}
+                        {"\n"}
+                        당신의 공간은 어떤색인가요 ?{"\n"}
+                        {"\n"}
+                        아래 버튼을 눌러 광고를 시청해 주시면 {"\n"}
+                        사용횟수를 추가 할 수 있습니다.{"\n"}
+                        {"\n"}
+                        계속해서 더 좋은 서비스로 보답드리겠습니다.{"\n"}
+                        감사합니다.{"\n"}
+
+                    </Text>
                 </View>
-                <View style={[FlexStyles.flex_2, styles.reward_bottom]}>
-                    <Text style={[styles.reward_text]}> 광고 한편 보고 와 주시면{"\n"} 저는 색상 추출을 위한 에너지를 모으고 있을게요.</Text>
+                <View style={[FlexStyles.flex_1, styles.reward_button_container]}>
+                    <TouchableOpacity style={[FlexStyles.flex_1, styles.reward_button, adLoadingButtonStyle]} activeOpacity={1} onPress={() => showAd()}>
+                        <Text style={[styles.reward_button_text, adLoadingTextStyle]}>광고보고 5회 추가하기</Text>
+                        <ActivityIndicator style={[adLoadingIndicatorStyle]} size="large" color="#FFFFFF" />
+                    </TouchableOpacity>
                 </View>
             </View>
         </SafeAreaView>
@@ -105,53 +126,78 @@ const styles = StyleSheet.create({
     },
 
     option_tap: {
+        paddingLeft: 19,
+        paddingRight: 19,
         height: 50,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-around',
+
     },
     button_container: {
         padding: 5,
         alignItems: 'center',
-        justifyContent: 'center',
+        // justifyContent: 'center',
+    },
+    button_back_container: {
+        justifyContent: 'flex-start',
+    },
+    button_back: {
+        alignSelf: 'flex-start',
     },
     reaward_counter_text_container: {
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
     },
     reaward_counter_text: {
         textAlign: 'center',
+        textAlignVertical: 'center',
+        alignSelf: 'flex-end',
         fontSize: 16,
-        width: 24,
         height: 24,
+        lineHeight: 24,
     },
 
     option_tap_image: {
         width: 24,
         height: 24,
     },
-    reward_container: {
-        flexDirection: 'row',
-        position: 'relative',
-        alignItems: 'center',
-        justifyContent: 'center',
+    reward_text_container: {
+        paddingTop: 30,
+        paddingRight: 24,
+        paddingBottom: 30,
+        paddingLeft: 24,
+        // flexDirection: 'row',
+        // justifyContent: 'space-around',
+        alignItems: 'flex-start',
     },
-    reward: {
-        flex: 1,
-        aspectRatio: 1,
-        position: 'relative',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'yellow',
-    },
-    reward_bottom: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
+    reward_text_title: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        lineHeight: 40,
     },
     reward_text: {
         fontSize: 16,
+        lineHeight: 25,
+    },
+    reward_button_container: {
+        flexDirection: 'row',
+        position: 'relative',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+    },
+    reward_button: {
+        flex: 1,
+        height: 70,
+        position: 'relative',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#000000',
+    },
+    reward_button_text: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        lineHeight: 70,
     },
 });
 
