@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "399839786751",
+    "firebase_url": "https://colorground-baa44.firebaseio.com",
+    "project_id": "colorground-baa44",
+    "storage_bucket": "colorground-baa44.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399839786751:android:345e66ece9fa8008bbbeca",
+        "android_client_info": {
+          "package_name": "com.colorground"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "399839786751-1gra0agil5uaeph2m1ech0bcqsjfi5le.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6yBRZ9QbtVV5y8Qgm4P9h-DEo7YgjX7A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "399839786751-1gra0agil5uaeph2m1ech0bcqsjfi5le.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "399839786751-eqj8bhsiku72dfh95ro861q3085oeolb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.ColorGround"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

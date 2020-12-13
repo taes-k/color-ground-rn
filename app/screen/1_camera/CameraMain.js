@@ -305,13 +305,17 @@ const CameraMain = ({ navigation, route }) =>
       const data = await cameraRef.current.takePictureAsync({
         quality: 1,
         exif: true,
+        fixOrientation: false,
+        orientation: "portrait",
       });
+
+      console.log('cameralog:', data);
 
       ImagePreprocessor.getResizeImage(data.uri).then(
         res =>
         {
           useColoringLimitCount();
-          navigation.navigate('Edit', { imagePath: res })
+          navigation.navigate('Edit', { imageData: res })
         }
       );
     }
@@ -328,11 +332,16 @@ const CameraMain = ({ navigation, route }) =>
     {
       getRecentPhoto().then(res =>
       {
-        var sourceUri = {
-          uri: res.edges[0].node.image.uri,
-        }
+        console.log("album RES", res);
 
-        setAlbumImageSource(sourceUri);
+        if(res.edges.length > 0)
+        {
+          var sourceUri = {
+            uri: res.edges[0].node.image.uri,
+          }
+
+          setAlbumImageSource(sourceUri);
+        }
       })
     }, []));
 
@@ -359,7 +368,7 @@ const CameraMain = ({ navigation, route }) =>
             res =>
             {
               useColoringLimitCount();
-              navigation.navigate('Edit', { imagePath: res })
+              navigation.navigate('Edit', { imageData: res })
             }
           );
         }
@@ -399,13 +408,16 @@ const CameraMain = ({ navigation, route }) =>
             type={cameraType}
             flashMode={cameraFlash}
             captureAudio={false}
+            ratio="1:1"
             style={[FlexStyles.flex_1, styles.camera]} />
           <View style={[styles.color_chip_box]}>
             <View style={[styles.color_chip]} />
             <View style={[styles.color_chip, styles.color_chip_mid]} />
             <View style={[styles.color_chip]} />
           </View>
-          <Text style={[timerCounterStyle, styles.timer_counter]}>{timerCount}</Text>
+          <View style={[styles.timer_counter_container]}>
+            <Text style={[timerCounterStyle, styles.timer_counter]}>{timerCount}</Text>
+          </View>
         </View>
         <View style={[FlexStyles.flex_2, styles.camera_bottom]}>
           <Animated.View style={[toastFadeOpacityStyle, styles.toast_container]}>
@@ -465,7 +477,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     lineHeight: 24,
-    fontSize: 16,
+    fontSize: 14,
     textAlign: 'center',
   },
   reward_tooltip_text: {
@@ -479,7 +491,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   camera: {
-    flex: 1,
+    // flex: 1,
+    width:'100%',
     aspectRatio: 1,
     position: 'relative',
     flexDirection: 'row',
@@ -505,12 +518,14 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginRight: 15,
   },
+  timer_counter_container: {
+    position: 'absolute',
+    bottom: 10
+  },
   timer_counter: {
     color: '#FFFFFF',
     fontSize: 45,
     fontWeight: '300',
-    position: 'absolute',
-    bottom: 10
   },
   camera_bottom: {
     flexDirection: 'row',

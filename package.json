@@ -23,6 +23,7 @@
     "react": "16.13.1",
     "react-native": "0.63.3",
     "react-native-camera": "^3.40.0",
+    "react-native-fs": "^2.16.6",
     "react-native-gesture-handler": "^1.8.0",
     "react-native-get-pixel-color": "^1.1.0-alpha.23",
     "react-native-image-picker": "^2.3.4",
