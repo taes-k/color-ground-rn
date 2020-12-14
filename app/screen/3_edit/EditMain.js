@@ -487,7 +487,7 @@ const EditMain = ({ navigation, route }) =>
     {
       date = '0' + date;
     }
-    var text = year + "." + month + "." + date;
+    var text = year + "/" + month + "/" + date;
     setTextValue(text);
   }
 
@@ -526,7 +526,7 @@ const EditMain = ({ navigation, route }) =>
             onStartShouldSetResponder={(ev) => true}
             onResponderGrant={onPhotoTouchEvent.bind(this, "onResponderGrant")}
             onResponderMove={onPhotoTouchEvent.bind(this, "onResponderMove")}>
-            <View style={[pickChipContainerStyle]}>
+            <View style={[pickChipContainerStyle]} pointerEvents='none'>
               <View style={[styles.color_pick_chip, pickChipStyle]}>
                 <Text style={[styles.color_pick_chip_text]}>+</Text>
               </View>
@@ -632,7 +632,7 @@ const EditMain = ({ navigation, route }) =>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>hh:mm:ss</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextYYYYMMDD()}>
-                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>yyyy.mm.dd</Text>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>yyyy/mm/dd</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextValue('')}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>Clear</Text>
@@ -704,10 +704,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: '#FFFFFF',
     borderStyle: 'solid',
-    borderWidth: 2,
+    borderWidth: 2
   },
   color_pick_chip_text: {
     fontSize: 25,
+    lineHeight:50,
     fontWeight: "200",
     color: "white",
     textAlignVertical: "center",
