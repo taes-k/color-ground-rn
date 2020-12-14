@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { StyleSheet, View, Button, Image, ImageBackground, Animated, TextInput, Alert, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, View, Button, Image, ImageBackground, Animated, TextInput, Alert, TouchableOpacity, Dimensions ,PermissionsAndroid, Platform} from 'react-native';
 import Text from '../../components/CustomText';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,7 +20,8 @@ const EditMain = ({ navigation, route }) =>
 {
   const dispatch = useDispatch();
 
-  const { imagePath } = route.params;
+  const { imageData } = route.params;
+  const imageSourcePath = imageData.type === 'path' ? imageData.data : "data:image/jpeg;base64," + imageData.data;
   const [imageScale, setImageScale] = useState(1);
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
 
@@ -57,9 +58,11 @@ const EditMain = ({ navigation, route }) =>
   {
     async function initEdit()
     {
-      await InitialColor.getInitialColors(imagePath, (x) => { setInitialReady(x) }, (x) => { setInitialColors(x) });
+      await InitialColor.getInitialColors(imageData, (x) => { setInitialReady(x) }, (x) => { setInitialColors(x) });
 
-      var [width, height] = await ImagePreprocessor.getImageSize(imagePath);
+      var [width, height] = imageData.type === 'path'
+        ? await ImagePreprocessor.getImageSize(imageData.data)
+        : await ImagePreprocessor.getBase64ImageSize(imageData.data);
       var scale = width / Dimensions.get('window').width;
 
       setImageScale(scale);
@@ -67,7 +70,7 @@ const EditMain = ({ navigation, route }) =>
     }
     if (initialReady == false)
     {
-      GetPixelColor.setImage(imagePath);
+      GetPixelColor.setImage(imageData.data);
       initEdit();
     }
     else
@@ -148,21 +151,24 @@ const EditMain = ({ navigation, route }) =>
 
   const [toastOpacityAnimatedValue, setToastOpacityAnimatedValue] = useState(new Animated.Value(0));
 
-  useEffect(()=>{    
-    setToastOpacityAnimatedValue(tutorialSuccess?new Animated.Value(0):new Animated.Value(1));
-  },[tutorialSuccess])
+  useEffect(() =>
+  {
+    setToastOpacityAnimatedValue(tutorialSuccess ? new Animated.Value(0) : new Animated.Value(1));
+  }, [tutorialSuccess])
 
-  useEffect(()=>{
-    if(toastBlink == true)
+  useEffect(() =>
+  {
+    if (toastBlink == true)
     {
       fadeInToast();
-      setTimeout(() => {
+      setTimeout(() =>
+      {
         fadeOutToast();
       }, 1000);
 
       setToastBlink(false);
     }
-  },[toastBlink])
+  }, [toastBlink])
 
   const fadeInToast = () =>
   {
@@ -206,11 +212,27 @@ const EditMain = ({ navigation, route }) =>
 
   const saveImage = async (imgUri) =>
   {
-    config = { type: 'photo', album: 'colorground' }
-    const result = await CameraRoll.save(imgUri);
+    if (Platform.OS === "android" && !(await hasAndroidPermission())) {
+      return;
+    }
+
+    var config = { type: 'photo', album: 'colorground' }
+    const result = await CameraRoll.save(imgUri, config);
     setToastMessageText("저장이 완료되었습니다.")
 
     setToastBlink(true);
+  }
+
+  const hasAndroidPermission = async() => {
+    const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+  
+    const hasPermission = await PermissionsAndroid.check(permission);
+    if (hasPermission) {
+      return true;
+    }
+  
+    const status = await PermissionsAndroid.request(permission);
+    return status === 'granted';
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -318,7 +340,7 @@ const EditMain = ({ navigation, route }) =>
     else
     {
       setPickColorChipDisplay(false);
-      if(!tutorialSuccess)
+      if (!tutorialSuccess)
       {
         fadeOutToast();
         dispatch(TutorialStatus.setEditTutorialSuccess());
@@ -349,12 +371,15 @@ const EditMain = ({ navigation, route }) =>
     }
   }
 
-  var pickChipStyle = {
+  var pickChipContainerStyle ={
     position: 'absolute',
-    backgroundColor: pickColorChip.hexColor,
     left: pickColorChip.coordX - 25,
     top: pickColorChip.coordY - 25,
+  };
+
+  var pickChipStyle = {
     display: pickColorChipDisplay == true ? 'flex' : 'none',
+    backgroundColor: pickColorChip.hexColor,
   };
 
   const movePickColorChip = (x, y, color) =>
@@ -497,12 +522,14 @@ const EditMain = ({ navigation, route }) =>
         <ViewShot ref={snapshotTarget} style={[styles.image_container]}>
           <ImageBackground
             style={[styles.image_view]}
-            source={{ uri: imagePath }}
+            source={{ uri: imageSourcePath }}
             onStartShouldSetResponder={(ev) => true}
             onResponderGrant={onPhotoTouchEvent.bind(this, "onResponderGrant")}
             onResponderMove={onPhotoTouchEvent.bind(this, "onResponderMove")}>
-            <View style={[styles.color_pick_chip, pickChipStyle]}>
-              <Text style={[styles.color_pick_chip_text]}>+</Text>
+            <View style={[pickChipContainerStyle]}>
+              <View style={[styles.color_pick_chip, pickChipStyle]}>
+                <Text style={[styles.color_pick_chip_text]}>+</Text>
+              </View>
             </View>
             <View style={[styles.color_chip_box]}>
               <TouchableOpacity
@@ -633,7 +660,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   button_container: {
-    padding:5,
+    padding: 5,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -652,6 +679,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    resizeMode: 'cover',
   },
   color_chip_box: {
     flexDirection: 'row',

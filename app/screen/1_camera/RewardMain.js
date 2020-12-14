@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         textAlignVertical: 'center',
         alignSelf: 'flex-end',
-        fontSize: 16,
+        fontSize: 14,
         height: 24,
         lineHeight: 24,
     },

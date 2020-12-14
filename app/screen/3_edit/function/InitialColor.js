@@ -6,35 +6,42 @@ import GetPixelColor from 'react-native-get-pixel-color';
 
 import ImageSize from './ImageSize';
 import PickColor from './PickColor';
+import ImagePreprocessor from './ImagePreprocessor';
 
-const getInitialColors = async (imagePath, setInitialReady, setInitialColors) =>
+const getInitialColors = async (imageData, setInitialReady, setInitialColors) =>
 {
-    await GetPixelColor.setImage(imagePath);
-    var initialColors = await getInitailColors(imagePath);
+    console.log("A");
+    await GetPixelColor.setImage(imageData.data).catch(e=>console.log("ERROR", e));
+    var initialColors = await getInitailColors(imageData);
 
     setInitialColors(initialColors);
     setInitialReady(true);
 }
 
-const getInitailColors = async (imagePath) =>
+const getInitailColors = async (imageData) =>
 {
-    var [width, height] = await getImageSize(imagePath);
-    var colors = await getSampleColors(imagePath, width, height);
+    console.log("B");
+    var [width, height] = imageData.type === 'path' 
+    ? await ImagePreprocessor.getImageSize(imageData.data) 
+    : await ImagePreprocessor.getBase64ImageSize(imageData.data);
+
+    var colors = await getSampleColors(width, height);
     var initialColors = getInitialSampleColors(colors)
 
     return initialColors;
 }
 
-const getImageSize = async (imagePath) => new Promise(resolve =>
-{
-    Image.getSize(imagePath, (width, height) =>
-    {
-        resolve([width, height]);
-    });
-})
+// const getImageSize = async (imagePath) => new Promise(resolve =>
+// {
+//     Image.getSize("data:image/jpeg;base64,"+imagePath, (width, height) =>
+//     {
+//         resolve([width, height]);
+//     });
+// })
 
-const getSampleColors = async (imagePath, width, height) =>
+const getSampleColors = async (width, height) =>
 {
+    console.log("C");
     var pickSize = 20;
     var colors = [];
     var pickCount = 0;
@@ -70,6 +77,7 @@ const getSampleColors = async (imagePath, width, height) =>
 
 const getInitialSampleColors = (colors) =>
 {
+    console.log("D");
     var tempPickColors = [];
 
     var colorsIdx = 0
