@@ -20,6 +20,7 @@ const RewardMain = ({ navigation, route }) =>
     const [adLoading, setAdLoading] = useState(false);
     const adUnitId = __DEV__
         ? TestIds.REWARDED
+        // 'ca-app-pub-8392395015115496/6109911925'
         : Platform.OS === 'ios' ? 'ca-app-pub-8392395015115496/6109911925' : 'ca-app-pub-8392395015115496/7719588637';
 
     const rewarded = RewardedAd.createForAdRequest(adUnitId, {
@@ -57,9 +58,10 @@ const RewardMain = ({ navigation, route }) =>
         }
         else
         {
+            console.log("Error", error);
             setAdLoading(false);
             dispatch(ColoringLimitActions.addErrorCount(5));
-            alert("광고 서비스 오류로 인해 정상수행되지 않습니다. 사용횟수는 5회까지 추가 해 드릴게요!");
+            alert("아직 광고 준비중이예요. 5회까지 자유롭게 이용하세요!");
         }
     });
 

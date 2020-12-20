@@ -33,6 +33,10 @@ export default (state = initialState, action) =>
 
         case actions.ADD_COUNT:
             state.count = state.count + action.count;
+            if(state.count > 99)
+            {
+                state.count = 99;
+            }
             setColoringLimitCountToLocalStorage(state.count);
             break;
 
