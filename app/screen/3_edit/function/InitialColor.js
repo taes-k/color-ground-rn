@@ -10,7 +10,6 @@ import ImagePreprocessor from './ImagePreprocessor';
 
 const getInitialColors = async (imageData, setInitialReady, setInitialColors) =>
 {
-    console.log("A");
     await GetPixelColor.setImage(imageData.data).catch(e=>console.log("ERROR", e));
     var initialColors = await getInitailColors(imageData);
 
@@ -20,7 +19,6 @@ const getInitialColors = async (imageData, setInitialReady, setInitialColors) =>
 
 const getInitailColors = async (imageData) =>
 {
-    console.log("B");
     var [width, height] = imageData.type === 'path' 
     ? await ImagePreprocessor.getImageSize(imageData.data) 
     : await ImagePreprocessor.getBase64ImageSize(imageData.data);
@@ -41,7 +39,6 @@ const getInitailColors = async (imageData) =>
 
 const getSampleColors = async (width, height) =>
 {
-    console.log("C");
     var pickSize = 20;
     var colors = [];
     var pickCount = 0;
@@ -77,7 +74,6 @@ const getSampleColors = async (width, height) =>
 
 const getInitialSampleColors = (colors) =>
 {
-    console.log("D");
     var tempPickColors = [];
 
     var colorsIdx = 0
