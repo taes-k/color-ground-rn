@@ -10,6 +10,7 @@ import Share from 'react-native-share';
 import Modal from 'react-native-modal';
 import Geolocation from '@react-native-community/geolocation';
 import * as TutorialStatus from '../../store/actions/TutorialStatus';
+import RNFS from 'react-native-fs';
 
 import TextModal from './TextModal';
 import FlexStyles from '../../style/FlexStyleSheet';
@@ -249,18 +250,21 @@ const EditMain = ({ navigation, route }) =>
 
   const openShare = async (imgUri) =>
   {
+    var imageFile = await RNFS.readFile(imgUri, 'base64');
+
     const options = {
-      url: imgUri,
+      url: "data:image/jpeg;base64," + imageFile,
+      failOnCancel: false,
     };
 
     Share.open(options)
       .then((res) =>
       {
-        console.log(res);
+        console.log("Share", res);
       })
       .catch((err) =>
       {
-        err && console.log(err);
+        err && console.log("Share Error", err);
       });
   }
 
