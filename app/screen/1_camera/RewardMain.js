@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, ActivityIndicator, Platform } from 'react-native';
 import Text from '../../components/CustomText';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,7 +18,9 @@ const RewardMain = ({ navigation, route }) =>
     // ---------------------------------------------------------------------------------------------
 
     const [adLoading, setAdLoading] = useState(false);
-    const adUnitId = __DEV__ ? TestIds.REWARDED : 'ca-app-pub-3940256099942544/1712485313';
+    const adUnitId = __DEV__
+        ? TestIds.REWARDED
+        : Platform.OS === 'ios' ? 'ca-app-pub-8392395015115496/6109911925' : 'ca-app-pub-8392395015115496/7719588637';
 
     const rewarded = RewardedAd.createForAdRequest(adUnitId, {
         requestNonPersonalizedAdsOnly: true,
@@ -55,8 +57,9 @@ const RewardMain = ({ navigation, route }) =>
         }
         else
         {
-            alert("광고 서비스 오류로 인해 정상수행되지 않습니다. 사용횟수는 5회까지 추가 해 드릴게요!");
+            setAdLoading(false);
             dispatch(ColoringLimitActions.addErrorCount(5));
+            alert("광고 서비스 오류로 인해 정상수행되지 않습니다. 사용횟수는 5회까지 추가 해 드릴게요!");
         }
     });
 
@@ -92,20 +95,20 @@ const RewardMain = ({ navigation, route }) =>
                 </View>
                 <View style={[FlexStyles.flex_column_4, styles.reward_text_container]}>
                     <Text style={[styles.reward_text_title]}>
-                        3XO - Colorground
+                        3XO
                     </Text>
                     <Text style={[styles.reward_text]}>
-                        내가 기억하는 곳, 내가 기억하는 시간{"\n"}
-                        나를 둘러싸고 있는 지금{"\n"}
-                        나중에 여행을 떠나게 될 때{"\n"}
+                        내가 기억하는 곳, 내가 기억하는 시간,{"\n"}
+                        나를 둘러싸고 있는 지금,{"\n"}
+                        익숙한 장소 혹은 낯선 여행지에서,{"\n"}
                         {"\n"}
                         당신의 공간은 어떤색인가요 ?{"\n"}
                         {"\n"}
                         아래 버튼을 눌러 광고를 시청해 주시면 {"\n"}
                         사용횟수를 추가 할 수 있습니다.{"\n"}
                         {"\n"}
-                        계속해서 더 좋은 서비스로 보답드리겠습니다.{"\n"}
-                        감사합니다.{"\n"}
+                        계속해서 더 좋은 서비스가 될 수 있도록{"\n"}
+                        노력하겠습니다. 감사합니다.{"\n"}
 
                     </Text>
                 </View>
@@ -122,7 +125,7 @@ const RewardMain = ({ navigation, route }) =>
 
 const styles = StyleSheet.create({
     background_style: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#F5F5F6',
     },
 
     option_tap: {
