@@ -4,6 +4,7 @@ import Text from '../../components/CustomText';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { RewardedAd, RewardedAdEventType, AdEventType, TestIds } from '@react-native-firebase/admob';
+import { useFocusEffect } from '@react-navigation/native';
 
 import * as ColoringLimitActions from '../../store/actions/ColoringLimit';
 import FlexStyles from '../../style/FlexStyleSheet'
@@ -18,59 +19,70 @@ const RewardMain = ({ navigation, route }) =>
     // ---------------------------------------------------------------------------------------------
 
     const [adLoading, setAdLoading] = useState(false);
-    const adUnitId = __DEV__
-        ? TestIds.REWARDED
-        // 'ca-app-pub-8392395015115496/6109911925'
-        : Platform.OS === 'ios' ? 'ca-app-pub-8392395015115496/6109911925' : 'ca-app-pub-8392395015115496/7719588637';
-
-    const rewarded = RewardedAd.createForAdRequest(adUnitId, {
-        requestNonPersonalizedAdsOnly: true,
-        // keywords: ['fashion', 'clothing'],
-    });
-
+    const [rewarded, setRewarded] = useState(
+        RewardedAd.createForAdRequest(__DEV__
+            ? TestIds.REWARDED
+            : Platform.OS === 'ios' ? 'ca-app-pub-8392395015115496/6109911925' : 'ca-app-pub-8392395015115496/7719588637'
+            , {
+                requestNonPersonalizedAdsOnly: true,
+            })
+        );
     useEffect(() =>
     {
+        const eventListener = rewarded.onAdEvent((type, error, reward) =>
+        {
+            if (type != AdEventType.ERROR)
+            {
+                if (type === RewardedAdEventType.LOADED)
+                {
+                    // ready to show ad
+                    // rewarded.show();
+                    console.log("준비완료", rewarded.loaded);
+                    setAdLoading(false);
+                }
+
+                if (type === RewardedAdEventType.EARNED_REWARD)
+                {
+                    // get reward
+                    dispatch(ColoringLimitActions.addCount(5));
+                }
+
+                if (type === AdEventType.CLOSED)
+                {
+                    navigation.goBack();
+                    // ad closed
+                }
+            }
+            else
+            {
+                console.log("Error", error);
+                setAdLoading(false);
+                dispatch(ColoringLimitActions.addErrorCount(5));
+                alert("아직 광고 준비중이예요. 5회까지 자유롭게 이용하세요!");
+            }
+        });
+
+        rewarded.load();
+        setAdLoading(true);
+
         return () => eventListener()
     }, []);
 
 
-    const eventListener = rewarded.onAdEvent((type, error, reward) =>
-    {
-        if (type != AdEventType.ERROR)
-        {
-            if (type === RewardedAdEventType.LOADED)
-            {
-                // ready to show ad
-                rewarded.show();
-                setAdLoading(false);
-            }
-
-            if (type === RewardedAdEventType.EARNED_REWARD)
-            {
-                // get reward
-                dispatch(ColoringLimitActions.addCount(5));
-            }
-
-            if (type === AdEventType.CLOSED)
-            {
-                // ad closed
-            }
-        }
-        else
-        {
-            console.log("Error", error);
-            setAdLoading(false);
-            dispatch(ColoringLimitActions.addErrorCount(5));
-            alert("아직 광고 준비중이예요. 5회까지 자유롭게 이용하세요!");
-        }
-    });
 
     const showAd = () =>
     {
-        if (adLoading != true)
+        if(!adLoading)
         {
-            setAdLoading(true);
-            rewarded.load();
+            if (rewarded.loaded)
+            {
+                rewarded.show();
+            }
+            else 
+            {
+                rewarded.load();
+                setAdLoading(true);
+            }
         }
     }
 

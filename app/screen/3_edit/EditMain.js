@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { StyleSheet, View, Button, Image, ImageBackground, Animated, TextInput, Alert, TouchableOpacity, Dimensions ,PermissionsAndroid, Platform} from 'react-native';
+import { Platform, StyleSheet, View, Button, Image, ImageBackground, Animated, TextInput, Alert, TouchableOpacity, Dimensions ,PermissionsAndroid} from 'react-native';
 import Text from '../../components/CustomText';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,7 +22,7 @@ const EditMain = ({ navigation, route }) =>
   const dispatch = useDispatch();
 
   const { imageData } = route.params;
-  const imageSourcePath = imageData.type === 'path' ? imageData.data : "data:image/jpeg;base64," + imageData.data;
+  const imageSourcePath = imageData.url;
   const [imageScale, setImageScale] = useState(1);
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
 
@@ -59,19 +59,30 @@ const EditMain = ({ navigation, route }) =>
   {
     async function initEdit()
     {
-      await InitialColor.getInitialColors(imageData, (x) => { setInitialReady(x) }, (x) => { setInitialColors(x) });
+      var imageDict = {};
+      if (Platform.OS === 'ios') 
+      {
+        imageDict = {url: imageData.url, data: imageData.url};
+      }
+      else
+      {
+        var base64Data = await ImagePreprocessor.getBase64FromFilePath(imageData.url);
+        imageDict = {url: imageData.url, data: base64Data};
+      }
 
-      var [width, height] = imageData.type === 'path'
-        ? await ImagePreprocessor.getImageSize(imageData.data)
-        : await ImagePreprocessor.getBase64ImageSize(imageData.data);
+      GetPixelColor.setImage(imageDict.data);
+      await InitialColor.getInitialColors(imageDict, (x) => { setInitialReady(x) }, (x) => { setInitialColors(x) });
+
+      var {width, height} = await ImagePreprocessor.getImageSize(imageData.url);
       var scale = width / Dimensions.get('window').width;
 
       setImageScale(scale);
       setInitialReady(true);
     }
+
     if (initialReady == false)
     {
-      GetPixelColor.setImage(imageData.data);
+
       initEdit();
     }
     else
@@ -355,11 +366,11 @@ const EditMain = ({ navigation, route }) =>
   const viewWidth = Dimensions.get('window').width;
 
   const onPhotoTouchEvent = (name, ev) =>
-  {
+  { 
     if (pickColorChipDisplay == true)
     {
-      coordX = ev.nativeEvent.locationX;
-      coordY = ev.nativeEvent.locationY;
+      var coordX = ev.nativeEvent.locationX;
+      var coordY = ev.nativeEvent.locationY;
 
       if (coordY < 0) coordY = 0;
       if (coordY > viewWidth) coordY = viewWidth - 1;
@@ -438,7 +449,7 @@ const EditMain = ({ navigation, route }) =>
         var addressList = [];
         var results = json.results;
 
-        for (i = 0; i < results.length; i++)
+        for (var i = 0; i < results.length; i++)
         {
           addressList.push(results[i].name);
         }
