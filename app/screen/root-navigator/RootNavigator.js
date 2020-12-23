@@ -14,7 +14,7 @@ const RootStack = createStackNavigator();
 
 function RootNavigator()
 {
-    const STANDARD_COUNT = 3;
+    const STANDARD_COUNT = 10;
     const dispatch = useDispatch();
 
     const isReady = useSelector((state) => state.appReady.isReady);

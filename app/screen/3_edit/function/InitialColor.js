@@ -11,31 +11,22 @@ import ImagePreprocessor from './ImagePreprocessor';
 const getInitialColors = async (imageData, setInitialReady, setInitialColors) =>
 {
     await GetPixelColor.setImage(imageData.data).catch(e=>console.log("ERROR", e));
-    var initialColors = await getInitailColors(imageData);
+    var initialColors = await getInitialColor(imageData);
 
     setInitialColors(initialColors);
     setInitialReady(true);
 }
 
-const getInitailColors = async (imageData) =>
+const getInitialColor = async (imageData) =>
 {
-    var [width, height] = imageData.type === 'path' 
-    ? await ImagePreprocessor.getImageSize(imageData.data) 
-    : await ImagePreprocessor.getBase64ImageSize(imageData.data);
+    var {width, height} = await ImagePreprocessor.getImageSize(imageData.url);
 
+    console.log("SIZE",width, height);
     var colors = await getSampleColors(width, height);
     var initialColors = getInitialSampleColors(colors)
 
     return initialColors;
 }
-
-// const getImageSize = async (imagePath) => new Promise(resolve =>
-// {
-//     Image.getSize("data:image/jpeg;base64,"+imagePath, (width, height) =>
-//     {
-//         resolve([width, height]);
-//     });
-// })
 
 const getSampleColors = async (width, height) =>
 {
@@ -46,9 +37,9 @@ const getSampleColors = async (width, height) =>
     var heightTerm = Math.floor(height / pickSize);
     var scale = width / Dimensions.get('window').width;
 
-    for (x = 1; x < pickSize; x++)
+    for (var x = 1; x < pickSize; x++)
     {
-        for (y = 1; y < pickSize; y++)
+        for (var y = 1; y < pickSize; y++)
         {
             let coordX = widthTerm * x;
             let coordY = heightTerm * y;

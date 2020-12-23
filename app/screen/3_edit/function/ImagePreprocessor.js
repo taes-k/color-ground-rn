@@ -1,9 +1,8 @@
 import React from 'react';
 import { Dimensions } from 'react-native';
 import ImageEditor from "@react-native-community/image-editor";
-import { Image } from 'react-native';
+import ImageSize from 'react-native-image-size'
 import RNFS from 'react-native-fs';
-import { Platform } from 'react-native'
 
 const getResizeImage = async (imagePath) =>
 {
@@ -12,7 +11,9 @@ const getResizeImage = async (imagePath) =>
 
 const cropImage = async (imagePath) => 
 {
-    var [width, height] = await getImageSize(imagePath);
+    var {width, height} = await getImageSize(imagePath);
+
+    console.log("WIDHT HEIGHT :", width, "/", height);
     var squareSize = Math.min(width, height);
     var offsetX;
     var offsetY;
@@ -35,53 +36,17 @@ const cropImage = async (imagePath) =>
     };
 
     var res = await getCropImage(imagePath, cropData);
-    console.log("RESRSERS ", res);
+    // console.log("RESRSERS ", res);
     return res;
 }
 
 const getCropImage = async(imagePath, cropData) => {
-    var type;
-    var data;
+    const imageUrl = await ImageEditor.cropImage(imagePath, cropData);
 
-    const url = await ImageEditor.cropImage(imagePath, cropData);
-
-    if (Platform.OS === 'ios') 
-    {
-        type = 'path';
-        data = url;
-        // resolve(url);
-    }
-    else
-    {
-        data = await getBase64FromFilePath(url);
-    }
-
-    var result = { type: type, data: data };
+    var result = {url: imageUrl};
     return result;
 }
 
-// const getCropImage = async (imagePath, cropData) => new Promise(resolve =>
-// {
-//     ImageEditor.cropImage(imagePath, cropData).then(url =>
-//     {
-//         var type;
-//         var data;
-
-//         if (Platform.OS === 'ios') 
-//         {
-//             type = 'path';
-//             data = url;
-//             // resolve(url);
-//         }
-//         else
-//         {
-//             data = await getBase64FromFilePath(url);
-//         }
-
-//         var result = { type: type, data: data };
-//         resolve(result);
-//     })
-// })
 
 const getBase64FromFilePath = async (imagePath) => new Promise(resolve =>
 {
@@ -90,20 +55,8 @@ const getBase64FromFilePath = async (imagePath) => new Promise(resolve =>
 
 })
 
-const getImageSize = async (imagePath) => new Promise(resolve =>
-{
-    Image.getSize(imagePath, (width, height) =>
-    {
-        resolve([width, height]);
-    });
-})
+const getImageSize = async(imagePath) => {
+    return await ImageSize.getSize(imagePath);
+}
 
-const getBase64ImageSize = async (imagePath) => new Promise(resolve =>
-{
-    Image.getSize("data:image/jpeg;base64," + imagePath, (width, height) =>
-    {
-        resolve([width, height]);
-    });
-})
-
-export default { getResizeImage, getImageSize, getBase64ImageSize };
+export default { getResizeImage, getBase64FromFilePath, getImageSize };

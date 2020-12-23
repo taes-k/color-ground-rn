@@ -267,6 +267,7 @@ const CameraMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   // take photo
   // ---------------------------------------------------------------------------------------------
+  
   const onPressTakePhoto = () =>
   {
     if (runTakePhotoTimer)
@@ -305,7 +306,7 @@ const CameraMain = ({ navigation, route }) =>
       const data = await cameraRef.current.takePictureAsync({
         quality: 1,
         exif: true,
-        fixOrientation: false,
+        fixOrientation: true,
         orientation: "portrait",
       });
 
