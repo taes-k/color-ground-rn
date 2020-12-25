@@ -11,9 +11,8 @@ const getResizeImage = async (imagePath) =>
 
 const cropImage = async (imagePath) => 
 {
-    var {width, height} = await getImageSize(imagePath);
+    var { width, height } = await getImageSize(imagePath);
 
-    console.log("WIDHT HEIGHT :", width, "/", height);
     var squareSize = Math.min(width, height);
     var offsetX;
     var offsetY;
@@ -32,18 +31,17 @@ const cropImage = async (imagePath) =>
     var cropData = {
         offset: { x: offsetX, y: offsetY },
         size: { width: squareSize, height: squareSize },
-        // displaySize: { width: Dimensions.get('window').width, height: Dimensions.get('window').width },
     };
 
     var res = await getCropImage(imagePath, cropData);
-    // console.log("RESRSERS ", res);
     return res;
 }
 
-const getCropImage = async(imagePath, cropData) => {
+const getCropImage = async (imagePath, cropData) =>
+{
     const imageUrl = await ImageEditor.cropImage(imagePath, cropData);
 
-    var result = {url: imageUrl};
+    var result = { url: imageUrl };
     return result;
 }
 
@@ -55,8 +53,23 @@ const getBase64FromFilePath = async (imagePath) => new Promise(resolve =>
 
 })
 
-const getImageSize = async(imagePath) => {
+const getImageSize = async (imagePath) =>
+{
+    if (imagePath.startsWith('content://'))
+    {
+        imagePath = await converContentUrlToFileUrl(imagePath);
+    }
+
     return await ImageSize.getSize(imagePath);
+}
+
+const converContentUrlToFileUrl: (String) = async (url) =>
+{
+    const urlComponents = url.split('/')
+    const fileNameAndExtension = urlComponents[urlComponents.length - 1]
+    const destPath = `${RNFS.TemporaryDirectoryPath}/${fileNameAndExtension}`
+    await RNFS.copyFile(url, destPath);
+    return 'file://' + destPath;
 }
 
 export default { getResizeImage, getBase64FromFilePath, getImageSize };

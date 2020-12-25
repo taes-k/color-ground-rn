@@ -168,7 +168,7 @@ const CameraMain = ({ navigation, route }) =>
   {
     if (coloringLimitCount < 4)
     {
-      if(coloringLimitCount == 0)
+      if (coloringLimitCount == 0)
       {
         setToastMessageText(COUNT_ZERO_MESSAGE);
       }
@@ -176,11 +176,11 @@ const CameraMain = ({ navigation, route }) =>
       {
         setToastMessageText(COUNT_WARNING_MESSAGE);
       }
-  
+
       setRewardCountWarning(true);
     }
     else 
-    { 
+    {
       setRewardCountWarning(false);
     }
   }
@@ -215,7 +215,7 @@ const CameraMain = ({ navigation, route }) =>
   useFocusEffect(
     React.useCallback(() =>
     {
-      if(rewardCountWarning)
+      if (rewardCountWarning)
       {
         setToastBlink(true);
       }
@@ -228,19 +228,21 @@ const CameraMain = ({ navigation, route }) =>
     }, [rewardCountWarning])
   );
 
-  useEffect(()=>{
+  useEffect(() =>
+  {
     var timeout;
 
-    if(toastBlink == true)
+    if (toastBlink == true)
     {
       fadeInToast();
-      timeout = setTimeout(() => {
+      timeout = setTimeout(() =>
+      {
         fadeOutToast();
       }, 2000);
     }
 
     return () => clearTimeout(timeout);
-  },[toastBlink])
+  }, [toastBlink])
 
   const fadeInToast = () =>
   {
@@ -267,7 +269,7 @@ const CameraMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
   // take photo
   // ---------------------------------------------------------------------------------------------
-  
+
   const onPressTakePhoto = () =>
   {
     if (runTakePhotoTimer)
@@ -335,7 +337,7 @@ const CameraMain = ({ navigation, route }) =>
       {
         console.log("album RES", res);
 
-        if(res.edges.length > 0)
+        if (res.edges.length > 0)
         {
           var sourceUri = {
             uri: res.edges[0].node.image.uri,
@@ -493,7 +495,7 @@ const styles = StyleSheet.create({
   },
   camera: {
     // flex: 1,
-    width:'100%',
+    width: '100%',
     aspectRatio: 1,
     position: 'relative',
     flexDirection: 'row',

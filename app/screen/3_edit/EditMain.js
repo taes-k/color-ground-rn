@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { Platform, StyleSheet, View, Button, Image, ImageBackground, Animated, TextInput, Alert, TouchableOpacity, Dimensions ,PermissionsAndroid} from 'react-native';
+import { Platform, StyleSheet, View, Button, Image, ImageBackground, Animated, TextInput, Alert, TouchableOpacity, Dimensions, PermissionsAndroid } from 'react-native';
 import Text from '../../components/CustomText';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
@@ -62,18 +62,18 @@ const EditMain = ({ navigation, route }) =>
       var imageDict = {};
       if (Platform.OS === 'ios') 
       {
-        imageDict = {url: imageData.url, data: imageData.url};
+        imageDict = { url: imageData.url, data: imageData.url };
       }
       else
       {
         var base64Data = await ImagePreprocessor.getBase64FromFilePath(imageData.url);
-        imageDict = {url: imageData.url, data: base64Data};
+        imageDict = { url: imageData.url, data: base64Data };
       }
 
       GetPixelColor.setImage(imageDict.data);
       await InitialColor.getInitialColors(imageDict, (x) => { setInitialReady(x) }, (x) => { setInitialColors(x) });
 
-      var {width, height} = await ImagePreprocessor.getImageSize(imageData.url);
+      var { width, height } = await ImagePreprocessor.getImageSize(imageData.url);
       var scale = width / Dimensions.get('window').width;
 
       setImageScale(scale);
@@ -224,7 +224,8 @@ const EditMain = ({ navigation, route }) =>
 
   const saveImage = async (imgUri) =>
   {
-    if (Platform.OS === "android" && !(await hasAndroidPermission())) {
+    if (Platform.OS === "android" && !(await hasAndroidPermission()))
+    {
       return;
     }
 
@@ -235,14 +236,16 @@ const EditMain = ({ navigation, route }) =>
     setToastBlink(true);
   }
 
-  const hasAndroidPermission = async() => {
+  const hasAndroidPermission = async () =>
+  {
     const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
-  
+
     const hasPermission = await PermissionsAndroid.check(permission);
-    if (hasPermission) {
+    if (hasPermission)
+    {
       return true;
     }
-  
+
     const status = await PermissionsAndroid.request(permission);
     return status === 'granted';
   }
@@ -363,14 +366,34 @@ const EditMain = ({ navigation, route }) =>
     }
   }
 
-  const viewWidth = Dimensions.get('window').width;
+  // safe area 를 고려한 Y offset을 구하기 위한 작업
+  const editViewRef = useRef();
+  const [editViewRenderReady, setEditViewRenderReady] = useState(false);
+  const [snapshotTargetLocationY, setSnapshotTargetLocationY] = useState(50);
 
+  const setSnapshotTargetOffset = () =>
+  {
+    editViewRef.current.measure((width, height, px, py, fx, fy) =>
+    {
+      setSnapshotTargetLocationY(fy);
+    });
+  };
+
+  useEffect(() =>
+  {
+    if (editViewRenderReady)
+    {
+      setSnapshotTargetOffset();
+    }
+  }, [editViewRenderReady])
+
+  const viewWidth = Dimensions.get('window').width;
   const onPhotoTouchEvent = (name, ev) =>
-  { 
+  {
     if (pickColorChipDisplay == true)
     {
-      var coordX = ev.nativeEvent.locationX;
-      var coordY = ev.nativeEvent.locationY;
+      var coordX = ev.nativeEvent.pageX;
+      var coordY = ev.nativeEvent.pageY - snapshotTargetLocationY;
 
       if (coordY < 0) coordY = 0;
       if (coordY > viewWidth) coordY = viewWidth - 1;
@@ -386,7 +409,7 @@ const EditMain = ({ navigation, route }) =>
     }
   }
 
-  var pickChipContainerStyle ={
+  var pickChipContainerStyle = {
     position: 'absolute',
     left: pickColorChip.coordX - 25,
     top: pickColorChip.coordY - 25,
@@ -534,7 +557,10 @@ const EditMain = ({ navigation, route }) =>
             />
           </TouchableOpacity>
         </View>
-        <ViewShot ref={snapshotTarget} style={[styles.image_container]}>
+        <View ref={editViewRef} onLayout={(event) => setEditViewRenderReady(true)} />
+        <ViewShot
+          ref={snapshotTarget}
+          style={[styles.image_container]} >
           <ImageBackground
             style={[styles.image_view]}
             source={{ uri: imageSourcePath }}
@@ -600,8 +626,6 @@ const EditMain = ({ navigation, route }) =>
           </TouchableOpacity>
         </View>
       </View>
-
-
 
       <Modal
         isVisible={textModalShow}
@@ -723,7 +747,7 @@ const styles = StyleSheet.create({
   },
   color_pick_chip_text: {
     fontSize: 25,
-    lineHeight:50,
+    lineHeight: 50,
     fontWeight: "200",
     color: "white",
     textAlignVertical: "center",
