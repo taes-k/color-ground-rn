@@ -8,7 +8,8 @@ import CameraRoll from "@react-native-community/cameraroll";
 import { useFocusEffect } from '@react-navigation/native';
 
 import * as ColoringLimitActions from '../../store/actions/ColoringLimit';
-import imagePicker from 'react-native-image-picker'
+import imagePicker from 'react-native-image-crop-picker'
+
 import FlexStyles from '../../style/FlexStyleSheet'
 import ImagePreprocessor from '../3_edit/function/ImagePreprocessor'
 const CameraMain = ({ navigation, route }) =>
@@ -306,21 +307,17 @@ const CameraMain = ({ navigation, route }) =>
     if (cameraRef)
     {
       const data = await cameraRef.current.takePictureAsync({
-        quality: 1,
+        quality: 0.8,
         exif: true,
         fixOrientation: true,
+        forceUpOrientation: true,
         orientation: "portrait",
       });
 
       console.log('cameralog:', data);
 
-      ImagePreprocessor.getResizeImage(data.uri).then(
-        res =>
-        {
-          useColoringLimitCount();
-          navigation.navigate('Edit', { imageData: res })
-        }
-      );
+      useColoringLimitCount();
+      navigation.navigate('Edit', { imageData: data.uri });
     }
   };
 
@@ -361,21 +358,36 @@ const CameraMain = ({ navigation, route }) =>
 
     if (checkColoringLimitCount())
     {
-      const options = { noData: true };
 
-      imagePicker.launchImageLibrary(options, response =>
-      {
-        if (response != null && response.uri != null)
+      const options = {
+        width: 2000,
+        height: 2000,
+        cropping: true,
+
+      };
+
+      imagePicker.openPicker(options)
+        .then(image =>
         {
-          ImagePreprocessor.getResizeImage(response.uri).then(
-            res =>
-            {
-              useColoringLimitCount();
-              navigation.navigate('Edit', { imageData: res })
-            }
-          );
-        }
-      })
+          if(image.path.startsWith('content://'))
+          {
+            ImagePreprocessor.converContentUrlToFileUrl(image.path)
+              .then(res => 
+              {
+                console.log("RES", res);
+                useColoringLimitCount();
+                navigation.navigate('Edit', { imageData: res });
+              });
+          }
+          else
+          {
+            useColoringLimitCount();
+            navigation.navigate('Edit', { imageData: image.path });
+          }
+          // var imagePath = image.path.startsWith('content://') ? await converContentUrlToFileUrl(imageData) : imageData;
+          // useColoringLimitCount();
+          // navigation.navigate('Edit', { imageData: image.path });
+        });
     }
     else
     {
