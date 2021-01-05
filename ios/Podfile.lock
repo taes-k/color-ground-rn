@@ -333,8 +333,6 @@ PODS:
   - react-native-image-editor (2.3.0):
     - React
     - React-RCTImage
-  - react-native-image-picker (2.3.4):
-    - React-Core
   - react-native-safe-area-context (3.1.8):
     - React-Core
   - react-native-view-shot (3.1.2):
@@ -415,12 +413,22 @@ PODS:
     - React
   - RNGestureHandler (1.8.0):
     - React
+  - RNImageCropPicker (0.35.2):
+    - React-Core
+    - React-RCTImage
+    - RNImageCropPicker/QBImagePickerController (= 0.35.2)
+    - TOCropViewController
+  - RNImageCropPicker/QBImagePickerController (0.35.2):
+    - React-Core
+    - React-RCTImage
+    - TOCropViewController
   - RNReanimated (1.13.1):
     - React
   - RNScreens (2.12.0):
     - React-Core
   - RNShare (4.1.0):
     - React-Core
+  - TOCropViewController (2.6.0)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -469,7 +477,6 @@ DEPENDENCIES:
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-get-pixel-color (from `../node_modules/react-native-get-pixel-color`)
   - "react-native-image-editor (from `../node_modules/@react-native-community/image-editor`)"
-  - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-view-shot (from `../node_modules/react-native-view-shot`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -488,6 +495,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -520,6 +528,7 @@ SPEC REPOS:
     - OpenSSL-Universal
     - PersonalizedAdConsent
     - PromisesObjC
+    - TOCropViewController
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -563,8 +572,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-get-pixel-color"
   react-native-image-editor:
     :path: "../node_modules/@react-native-community/image-editor"
-  react-native-image-picker:
-    :path: "../node_modules/react-native-image-picker"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-view-shot:
@@ -601,6 +608,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNImageCropPicker:
+    :path: "../node_modules/react-native-image-crop-picker"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -656,7 +665,6 @@ SPEC CHECKSUMS:
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
   react-native-get-pixel-color: 68005d505be66fd0329f65e67b2a3db83154fde3
   react-native-image-editor: bd67912f38a8e7a895bf6eb8f445acdcefd8fd0c
-  react-native-image-picker: 32d1ad2c0024ca36161ae0d5c2117e2d6c441f11
   react-native-safe-area-context: 01158a92c300895d79dee447e980672dc3fb85a6
   react-native-view-shot: 08c46c9e8e92f6681e8f2ffa55ac3d06e7e99070
   React-RCTActionSheet: 53ea72699698b0b47a6421cb1c8b4ab215a774aa
@@ -675,9 +683,11 @@ SPEC CHECKSUMS:
   RNFBApp: 2b4e07dfca4cf780b9e2d61bcc21e34d890cd654
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: 7a5833d0f788dbd107fbb913e09aa0c1ff333c39
+  RNImageCropPicker: 9e0bf18cf4184a846fed55747c8e622208b39947
   RNReanimated: dd8c286ab5dd4ba36d3a7fef8bff7e08711b5476
   RNScreens: 4b488fdf9537bbce829e2910c8cce1d17f6d9be8
   RNShare: 106a76243ac90f43ddb9028dcb78ade406b8adff
+  TOCropViewController: 3105367e808b7d3d886a74ff59bf4804e7d3ab38
   Yoga: 7d13633d129fd179e01b8953d38d47be90db185a
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 

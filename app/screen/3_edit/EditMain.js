@@ -22,7 +22,7 @@ const EditMain = ({ navigation, route }) =>
   const dispatch = useDispatch();
 
   const { imageData } = route.params;
-  const imageSourcePath = imageData.url;
+  const imageSourcePath = imageData;
   const [imageScale, setImageScale] = useState(1);
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
 
@@ -62,18 +62,18 @@ const EditMain = ({ navigation, route }) =>
       var imageDict = {};
       if (Platform.OS === 'ios') 
       {
-        imageDict = { url: imageData.url, data: imageData.url };
+        imageDict = { url: imageData, data: imageData };
       }
       else
       {
-        var base64Data = await ImagePreprocessor.getBase64FromFilePath(imageData.url);
-        imageDict = { url: imageData.url, data: base64Data };
+        var base64Data = await ImagePreprocessor.getBase64FromFilePath(imageData);
+        imageDict = { url: imageData, data: base64Data };
       }
 
       GetPixelColor.setImage(imageDict.data);
       await InitialColor.getInitialColors(imageDict, (x) => { setInitialReady(x) }, (x) => { setInitialColors(x) });
 
-      var { width, height } = await ImagePreprocessor.getImageSize(imageData.url);
+      var { width, height } = await ImagePreprocessor.getImageSize(imageDict.url);
       var scale = width / Dimensions.get('window').width;
 
       setImageScale(scale);
