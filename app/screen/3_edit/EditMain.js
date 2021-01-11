@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { Platform, StyleSheet, View, Button, Image, ImageBackground, Animated, TextInput, Alert, TouchableOpacity, Dimensions, PermissionsAndroid } from 'react-native';
+import { Platform, StyleSheet, View, Button, Image, ImageBackground, Animated, TextInput, Alert, TouchableOpacity, Dimensions, PermissionsAndroid, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Text from '../../components/CustomText';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, withSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,8 @@ import Modal from 'react-native-modal';
 import Geolocation from '@react-native-community/geolocation';
 import * as TutorialStatus from '../../store/actions/TutorialStatus';
 import RNFS from 'react-native-fs';
+
+import * as TextHistoryActions from '../../store/actions/TextHistory';
 
 import TextModal from './TextModal';
 import FlexStyles from '../../style/FlexStyleSheet';
@@ -47,6 +49,7 @@ const EditMain = ({ navigation, route }) =>
   const [pickColorChipDisplay, setPickColorChipDisplay] = useState(false);
   const [pickedColorChipNumber, setPickedColorChipNumber] = useState(0);
 
+  // const [historyTextList, setHistoryTextList] = useState([]);
   const [gpsAddressList, setGpsAddressList] = useState([]);
   const [textModalShow, setTextModalShow] = useState(false);
   const [textValue, setTextValue] = useState('');
@@ -432,9 +435,10 @@ const EditMain = ({ navigation, route }) =>
   }
 
   // ---------------------------------------------------------------------------------------------
-  // pick colorchip setting
+  // stamp text setting
   // ---------------------------------------------------------------------------------------------
 
+  const historyTextList = useSelector((state) => state.textHistory.list);
   const GOOGLE_MAP_API_KEY = "AIzaSyA1Afj2Dqfq8uwdaxIT5GuGhE6o7DEZsJ8";
 
   useEffect(() =>
@@ -444,6 +448,11 @@ const EditMain = ({ navigation, route }) =>
       getNearByPlace(info.coords.latitude + "," + info.coords.longitude);
     });
   }, [])
+
+  const addTextHistory = (text) =>
+  {
+    dispatch(TextHistoryActions.setNewText(text));
+  }
 
   const showTextSettingModal = () =>
   {
@@ -460,7 +469,7 @@ const EditMain = ({ navigation, route }) =>
     const googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
     const languageParam = "language=en"
     const locationParam = "location="
-    const radiusParam = "radius=1000";
+    const radiusParam = "radius=200";
     const keyParam = "key=" + GOOGLE_MAP_API_KEY;
 
     const callUrl = googlePlaceUrl + '?' + languageParam + "&" + locationParam + coords + "&" + radiusParam + "&" + keyParam;
@@ -484,7 +493,14 @@ const EditMain = ({ navigation, route }) =>
       });
   };
 
-  const setTextHHMMSS = () =>
+  const appendTextValue = (text) =>
+  {
+    var tempText = textValue;
+    tempText += text;
+    setTextValue(tempText);
+  }
+
+  const getTextHHMMSS: (String) = () =>
   {
     var date = new Date();
 
@@ -506,10 +522,11 @@ const EditMain = ({ navigation, route }) =>
     }
 
     var text = hours + ":" + minutes + ":" + seconds;
-    setTextValue(text);
+    return text;
+    // setTextValue(text);
   }
 
-  const setTextYYYYMMDD = () =>
+  const getTextYYYYMMDD: (String) = () =>
   {
     var date = new Date();
 
@@ -526,14 +543,36 @@ const EditMain = ({ navigation, route }) =>
       date = '0' + date;
     }
     var text = year + "/" + month + "/" + date;
-    setTextValue(text);
+    return text;
+    // setTextValue(text);
   }
+
+  const confirmStampText = () =>
+  {
+    if (textValue && textValue.length > 0)
+    {
+      addTextHistory(textValue);
+    }
+
+    hideTextSettingModal()
+  }
+
+  const history1DisplayStyle = { display: historyTextList[0] && historyTextList[0].length > 0 ? 'flex' : 'none' };
+  const history2DisplayStyle = { display: historyTextList[1] && historyTextList[1].length > 0 ? 'flex' : 'none' };
+  const history3DisplayStyle = { display: historyTextList[2] && historyTextList[2].length > 0 ? 'flex' : 'none' };
 
   const gpsAddress1DisplayStyle = { display: gpsAddressList.length > 0 ? 'flex' : 'none' };
   const gpsAddress2DisplayStyle = { display: gpsAddressList.length > 1 ? 'flex' : 'none' };
   const gpsAddress3DisplayStyle = { display: gpsAddressList.length > 2 ? 'flex' : 'none' };
 
   // ---------------------------------------------------------------------------------------------
+
+  const DismissKeyboard = ({children}) => (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      {children}
+    </TouchableWithoutFeedback>
+  )
+
   return (
     <SafeAreaView style={[FlexStyles.flex_1, backgroundColorStyle]} >
       <View style={[FlexStyles.flex_1]} >
@@ -631,14 +670,15 @@ const EditMain = ({ navigation, route }) =>
         isVisible={textModalShow}
         // swipeDirection='up'
         style={{ justifyContent: 'flex-end', margin: 0 }}
-        onSwipeComplete={() => hideTextSettingModal()}
+        onSwipeComplete={() => confirmStampText()}
         swipeDirection={['up', 'down']}
-        onBackdropPress={() => hideTextSettingModal()}
+        onBackdropPress={() => confirmStampText()}
       >
-        <TouchableOpacity style={{ flex: 3 }} activeOpacity={0} onPress={() => hideTextSettingModal()}>
+        <TouchableOpacity style={{ flex: 3 }} activeOpacity={0} onPress={() => confirmStampText()}>
           {/* for align space */}
         </TouchableOpacity>
-        <View style={[styles.modal_container]}>
+
+        <TouchableOpacity style={[styles.modal_container]} activeOpacity={1} onPress={() => Keyboard.dismiss()}>
           <View style={[styles.modal_option_tab]}>
             <View style={[FlexStyles.flex_4, styles.modal_option_tab_text_container]}>
               <Text style={[styles.modal_option_tab_text]} >Text</Text>
@@ -651,40 +691,54 @@ const EditMain = ({ navigation, route }) =>
                 style={[FlexStyles.flex_4, styles.modal_contents_text_input]}
                 onChangeText={text => setTextValue(text)}
                 value={textValue}
+                multiline={true}
+                placeholder="사진에 들어갈 텍스트를 입력하세요"
+                enablesReturnKeyAutomatically={true}
               />
               <View style={FlexStyles.flex_1} />
             </View>
             <View style={FlexStyles.flex_1, styles.modal_text_select_button_container}>
               <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity style={[styles.modal_text_select_button, gpsAddress1DisplayStyle]} activeOpacity={0.5} onPress={() => setTextValue(gpsAddressList[0])}>
+                <TouchableOpacity style={[styles.modal_text_select_button, history1DisplayStyle]} activeOpacity={0.5} onPress={() => appendTextValue(historyTextList[0])}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>{historyTextList[0]}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modal_text_select_button, history2DisplayStyle]} activeOpacity={0.5} onPress={() => appendTextValue(historyTextList[1])}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>{historyTextList[1]}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modal_text_select_button, history3DisplayStyle]} activeOpacity={0.5} onPress={() => appendTextValue(historyTextList[2])}>
+                  <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>{historyTextList[2]}</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity style={[styles.modal_text_select_button, gpsAddress1DisplayStyle]} activeOpacity={0.5} onPress={() => appendTextValue(gpsAddressList[0])}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>{gpsAddressList[0]}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.modal_text_select_button, gpsAddress2DisplayStyle]} activeOpacity={0.5} onPress={() => setTextValue(gpsAddressList[1])}>
+                <TouchableOpacity style={[styles.modal_text_select_button, gpsAddress2DisplayStyle]} activeOpacity={0.5} onPress={() => appendTextValue(gpsAddressList[1])}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>{gpsAddressList[1]}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.modal_text_select_button, gpsAddress3DisplayStyle]} activeOpacity={0.5} onPress={() => setTextValue(gpsAddressList[2])}>
+                <TouchableOpacity style={[styles.modal_text_select_button, gpsAddress3DisplayStyle]} activeOpacity={0.5} onPress={() => appendTextValue(gpsAddressList[2])}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>{gpsAddressList[2]}</Text>
                 </TouchableOpacity>
               </View>
               <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextHHMMSS()}>
+                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => appendTextValue(getTextHHMMSS())}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>hh:mm:ss</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextYYYYMMDD()}>
+                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => appendTextValue(getTextYYYYMMDD())}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>yyyy/mm/dd</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.modal_text_select_button]} activeOpacity={0.5} onPress={() => setTextValue('')}>
+                <TouchableOpacity style={[styles.modal_text_select_button, styles.clear_button]} activeOpacity={0.5} onPress={() => setTextValue('')}>
                   <Text numberOfLines={1} style={[styles.modal_text_select_button_text]}>Clear</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={[FlexStyles.flex_1, styles.modal_ok_button_container]}>
-              <TouchableOpacity style={[styles.modal_ok_button]} activeOpacity={0.8} onPress={() => hideTextSettingModal()}>
+              <TouchableOpacity style={[styles.modal_ok_button]} activeOpacity={0.8} onPress={() => confirmStampText()}>
                 <Text style={[styles.modal_ok_button_text]}>OK</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
@@ -764,8 +818,8 @@ const styles = StyleSheet.create({
   text_tag_text: {
     color: 'rgba(255,255,255,0.9)',
     fontSize: 12,
-    lineHeight: 13,
-    fontFamily: 'Roboto'
+    lineHeight: 15,
+    fontFamily: 'RobotoSlab-Regular'
   },
   edit_bottom: {
     position: 'relative',
@@ -801,7 +855,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   edit_bottom_button_text: {
-    fontFamily: 'Roboto',
+    // fontFamily: 'RobotoSlab-Regular',
     marginTop: 15,
     fontSize: 12,
   },
@@ -842,6 +896,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 15,
     height: 40,
+    lineHeight: 20,
+    textAlignVertical: 'bottom',
+    alignItems: 'baseline',
+    alignSelf: 'baseline',
+    // maxHeight: 50,
     borderBottomColor: '#000000',
     borderStyle: 'solid',
     borderBottomWidth: 1,
@@ -858,7 +917,8 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     paddingLeft: 15,
     marginTop: 10,
-    marginRight: 10,
+    marginLeft: 5,
+    marginRight: 5,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#000000',
@@ -868,9 +928,11 @@ const styles = StyleSheet.create({
   modal_text_select_button_text: {
     fontSize: 13,
     fontWeight: '400',
-    maxWidth: 90,
+    maxWidth: 80,
   },
-
+  clear_button: {
+    // backgroundColor: '#d0d0d0',
+  },
   modal_ok_button_container: {
     alignItems: 'center',
     justifyContent: 'center',

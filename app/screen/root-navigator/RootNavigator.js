@@ -9,14 +9,13 @@ import CameraMain from '../1_camera/CameraMain';
 import AppMainStack from './AppMainStack';
 import * as ColoringLimitActions from '../../store/actions/ColoringLimit';
 import * as TutorialStatusActions from '../../store/actions/TutorialStatus';
+import * as TextHistoryActions from '../../store/actions/TextHistory';
 
 const RootStack = createStackNavigator();
 
 function RootNavigator()
 {
-    const STANDARD_COUNT = 10;
     const dispatch = useDispatch();
-
     const isReady = useSelector((state) => state.appReady.isReady);
 
     useEffect(() =>
@@ -27,11 +26,16 @@ function RootNavigator()
 
         console.log("tutorial setting");
         getTutorialStatus()
-            .then(res => dispatch(TutorialStatusActions.setTutorialStatus(res)))
+            .then(res => dispatch(TutorialStatusActions.setTutorialStatus(res)));
+
+        console.log("textHistory setting");
+        getTextHistory()
+            .then(res => dispatch(TextHistoryActions.setTextHistory(res)));
     }, []);
 
     getColoringLimitCount = async () =>
     {
+        const STANDARD_COUNT = 10;
         var count = STANDARD_COUNT;
         try
         {
@@ -55,6 +59,32 @@ function RootNavigator()
             console.log(err);
         }
         return count;
+    }
+
+    getTextHistory = async () =>
+    {
+        const STANDARD_LIST = [];
+        var list = STANDARD_LIST;
+        try
+        {
+            var tsvList = await AsyncStorage.getItem(String(TextHistoryActions.TEXT_HISTORY));
+
+            if (tsvList != null)
+            {
+                list = tsvList.split("\t");
+            }
+            else
+            {
+                console.log("there's no local textHistory data");
+                list = STANDARD_LIST;
+            }
+        }
+        catch (err)
+        {
+            list = STANDARD_LIST;
+            console.log(err);
+        }
+        return list;
     }
 
     getTutorialStatus = async () =>
