@@ -421,6 +421,7 @@ const EditMain = ({ navigation, route }) =>
   var pickChipStyle = {
     display: pickColorChipDisplay == true ? 'flex' : 'none',
     backgroundColor: pickColorChip.hexColor,
+    borderWidth: pickColorChipDisplay == true ? 2 : 0,
   };
 
   const movePickColorChip = (x, y, color) =>
