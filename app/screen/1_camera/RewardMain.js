@@ -22,7 +22,7 @@ const RewardMain = ({ navigation, route }) =>
     const [rewarded, setRewarded] = useState(
         RewardedAd.createForAdRequest(__DEV__
             ? TestIds.REWARDED
-            : Platform.OS === 'ios' ? 'ca-app-pub-8392395015115496/6109911925' : 'ca-app-pub-8392395015115496/7719588637'
+            : Platform.OS === 'ios' ? '' : ''
             , {
                 requestNonPersonalizedAdsOnly: true,
             })
