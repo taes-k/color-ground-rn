@@ -440,7 +440,7 @@ const EditMain = ({ navigation, route }) =>
   // ---------------------------------------------------------------------------------------------
 
   const historyTextList = useSelector((state) => state.textHistory.list);
-  const GOOGLE_MAP_API_KEY = "AIzaSyA1Afj2Dqfq8uwdaxIT5GuGhE6o7DEZsJ8";
+  const GOOGLE_MAP_API_KEY = "";
 
   useEffect(() =>
   {
